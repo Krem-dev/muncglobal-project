@@ -3,7 +3,6 @@ import { runQuery, getQuery, Registration, Payment, PaymentInitialization } from
 import axios from 'axios';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import { assignCommitteeAndCountry } from '../utils/assignmentUtils.js';
 import { sendPaymentConfirmationEmail } from '../utils/helpers.js';
 import { sendEmail } from '../utils/emailService.js';
 
@@ -194,41 +193,25 @@ router.get('/verify/:reference', async (req, res) => {
       where: { registration_code: registrationCode }
     });
     
-    // If registration exists, assign committee and country
+    // If registration exists, update payment status
     if (existingRegistration) {
       console.log('Found existing registration:', existingRegistration.id, existingRegistration.registration_code);
       
-      // Assign committee and country
-      const { committee, country } = assignCommitteeAndCountry();
-      console.log('PAYMENT VERIFICATION - Assigned committee and country:');
-      console.log('Committee:', committee);
-      console.log('Country:', country);
-      
       await existingRegistration.update({
         payment_status: 'paid',
-        payment_method: 'paystack',
-        assigned_committee: committee,
-        assigned_country: country
+        payment_method: 'paystack'
       });
       
-      console.log('Updated registration with assignments');
+      console.log('Updated registration payment status');
       
-      // Send payment confirmation email with assignments
+      // Send payment confirmation email
       try {
-        // Fetch the updated registration with all fields to ensure we have the latest data
+        // Fetch the updated registration
         const updatedRegistration = await Registration.findByPk(existingRegistration.id);
-        
-        // Log the updated registration to verify committee and country are set
-        console.log('Updated registration before sending email:', {
-          id: updatedRegistration.id,
-          registration_code: updatedRegistration.registration_code,
-          assigned_committee: updatedRegistration.assigned_committee,
-          assigned_country: updatedRegistration.assigned_country
-        });
         
         // Send the email with the updated registration data
         await sendPaymentConfirmationEmail(updatedRegistration);
-        console.log(`Payment confirmation email sent to ${updatedRegistration.email} with assignments`);
+        console.log(`Payment confirmation email sent to ${updatedRegistration.email}`);
       } catch (emailError) {
         console.error('Error sending payment confirmation email:', emailError);
       }
@@ -308,20 +291,12 @@ router.post('/webhook', async (req, res) => {
               currency: data.currency
             });
             
-            // Assign committee and country
-            const { committee, country } = assignCommitteeAndCountry();
-            console.log('WEBHOOK - Assigned committee and country:');
-            console.log('Committee:', committee);
-            console.log('Country:', country);
-            
-            // Update registration payment status and assignments
+            // Update registration payment status
             await registration.update({ 
-              payment_status: 'paid',
-              assigned_committee: committee,
-              assigned_country: country
+              payment_status: 'paid'
             });
             
-            console.log('Webhook - Updated registration with assignments');
+            console.log('Webhook - Updated registration payment status');
             
             // Update payment initialization status
             await PaymentInitialization.update(
@@ -329,42 +304,17 @@ router.post('/webhook', async (req, res) => {
               { where: { reference: reference } }
             );
             
-            // Get updated registration with assignments - force a refresh from database
+            // Get updated registration - force a refresh from database
             const updatedRegistration = await Registration.findByPk(registration.id, {
               raw: false // Ensure we get a model instance, not a plain object
             });
             
-            // Verify the committee and country are set in the database
-            console.log('Webhook - Updated registration fetched:', {
-              id: updatedRegistration.id,
-              registration_code: updatedRegistration.registration_code,
-              assigned_committee: updatedRegistration.assigned_committee,
-              assigned_country: updatedRegistration.assigned_country
-            });
-            
-            // If committee or country is still undefined, set them again directly
-            if (!updatedRegistration.assigned_committee || !updatedRegistration.assigned_country) {
-              console.log('Webhook - Committee or country still undefined, setting again');
-              const { committee, country } = assignCommitteeAndCountry();
-              updatedRegistration.assigned_committee = committee;
-              updatedRegistration.assigned_country = country;
-              await updatedRegistration.save();
-              
-              console.log('WEBHOOK FALLBACK - Forced update of committee and country:');
-              console.log('Committee:', committee);
-              console.log('Country:', country);
-            }
-            
-            // Send payment confirmation email with committee and country assignments
+            // Send payment confirmation email
             try {
-              console.log('BEFORE SENDING EMAIL - Registration data:');
-              console.log('Registration ID:', updatedRegistration.id);
-              console.log('Registration Code:', updatedRegistration.registration_code);
-              console.log('Assigned Committee:', updatedRegistration.assigned_committee);
-              console.log('Assigned Country:', updatedRegistration.assigned_country);
+              console.log('Sending payment confirmation email to:', updatedRegistration.email);
               
               await sendPaymentConfirmationEmail(updatedRegistration);
-              console.log(`Payment confirmation email sent to ${updatedRegistration.email} with assignments`);
+              console.log(`Payment confirmation email sent to ${updatedRegistration.email}`);
             } catch (emailError) {
               console.error('Error sending payment confirmation email:', emailError);
               // Continue processing even if email fails

@@ -166,26 +166,12 @@ export const sendPaymentConfirmationEmail = async (registration) => {
     // Log all properties to help debug
     console.log('Registration object keys:', Object.keys(registrationData));
     
-    // Extract committee and country with explicit property access
-    const assigned_committee = registrationData.assigned_committee;
-    const assigned_country = registrationData.assigned_country;
-    
     console.log('Payment confirmation email - Extracted fields:', {
       first_name,
       surname,
       email,
-      registration_code,
-      assigned_committee,
-      assigned_country
+      registration_code
     });
-    
-    // Use the assigned committee and country without fallbacks
-    const committee = assigned_committee;
-    const country = assigned_country;
-    
-    console.log('EMAIL - Committee and country being sent in email:');
-    console.log('Committee:', committee);
-    console.log('Country:', country);
     const transporter = createEmailTransporter();
     
     // If no transporter available, log and continue without sending email
@@ -217,11 +203,6 @@ export const sendPaymentConfirmationEmail = async (registration) => {
       - Date: ${formattedDate}
       - Status: Confirmed
 
-      ${committee && country ? `Your Committee and Country Assignment:
-      - Committee: ${committee}
-      - Country: ${country}
-      - Topic: Tackling antimicrobial resistance on a global scale` : 'Your committee and country will be assigned soon.'}
-
       Please keep this email for your records. You will need your registration code for check-in at the event.
 
       If you have any questions, please contact us at info@muncglobal.com or call 0504314485.
@@ -249,21 +230,6 @@ export const sendPaymentConfirmationEmail = async (registration) => {
           <p><strong>Date:</strong> ${formattedDate}</p>
           <p><strong>Status:</strong> <span style="color: #047857; font-weight: bold;">Confirmed</span></p>
         </div>
-        
-        ${committee && country ? `
-        <div style="background-color: #f0f7ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #3b82f6;">
-          <h3 style="margin-top: 0; color: #1E40AF;">Your Committee and Country Assignment</h3>
-          <p><strong>Committee:</strong> <span style="color: #1d4ed8; font-weight: bold;">${committee}</span></p>
-          <p><strong>Country:</strong> <span style="color: #1d4ed8; font-weight: bold;">${country}</span></p>
-          <p><strong>Topic:</strong> <span style="color: #059669; font-weight: bold;">Tackling antimicrobial resistance on a global scale</span></p>
-          <p style="margin-top: 10px; font-style: italic; font-size: 14px;">Please prepare to represent your assigned country in your committee and research the topic thoroughly.</p>
-        </div>
-        ` : `
-        <div style="background-color: #f0f7ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #3b82f6;">
-          <h3 style="margin-top: 0; color: #1E40AF;">Committee and Country Assignment</h3>
-          <p>Your committee and country will be assigned soon.</p>
-        </div>
-        `}
 
         <p>Please keep this email for your records. You will need your registration code for check-in at the event.</p>
 

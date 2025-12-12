@@ -1,7 +1,6 @@
 import express from 'express';
 import { runQuery, getQuery, getAllQuery, Registration, Payment } from '../config/databaseMySQL.js';
 import { sendRegistrationEmail, sendPaymentConfirmationEmail } from '../utils/helpers.js';
-import { assignCommitteeAndCountry } from '../utils/assignmentUtils.js';
 
 const router = express.Router();
 
@@ -357,13 +356,7 @@ router.post('/complete', async (req, res) => {
       });
     }
 
-    // Assign committee and country
-    const { committee, country } = assignCommitteeAndCountry();
-    console.log('REGISTRATION COMPLETION - Assigned committee and country:');
-    console.log('Committee:', committee);
-    console.log('Country:', country);
-    
-    // Insert registration into database with paid status and committee/country assignment
+    // Insert registration into database with paid status
     const registration = await Registration.create({
       registration_code: registrationCode,
       first_name: firstName,
@@ -389,9 +382,7 @@ router.post('/complete', async (req, res) => {
       how_heard: howHeard,
       how_heard_other: howHeard === 'Other' ? howHeardOther : null,
       payment_status: 'paid',
-      payment_reference: paymentReference,
-      assigned_committee: committee,
-      assigned_country: country
+      payment_reference: paymentReference
     });
 
     console.log('Registration completed successfully for:', registrationCode);
@@ -407,19 +398,16 @@ router.post('/complete', async (req, res) => {
       }
     });
 
-    // Send only payment confirmation email with committee and country (asynchronously)
+    // Send payment confirmation email (asynchronously)
     setImmediate(async () => {
       try {
-        // Skip the registration confirmation email and only send payment confirmation
         await sendPaymentConfirmationEmail({
           first_name: firstName,
           surname,
           email,
-          registration_code: registrationCode,
-          assigned_committee: committee,
-          assigned_country: country
+          registration_code: registrationCode
         });
-        console.log('Payment confirmation email with committee and country sent to:', email);
+        console.log('Payment confirmation email sent to:', email);
       } catch (emailError) {
         console.error('Failed to send payment confirmation email (async):', emailError);
         // Intentionally not throwing: response already sent
@@ -659,12 +647,8 @@ router.post('/confirm-momo/:registrationCode', async (req, res) => {
       });
     }
 
-    const { committee, country } = assignCommitteeAndCountry();
-
     await registration.update({
-      payment_status: 'paid',
-      assigned_committee: committee,
-      assigned_country: country
+      payment_status: 'paid'
     });
 
     res.status(200).json({
@@ -672,9 +656,7 @@ router.post('/confirm-momo/:registrationCode', async (req, res) => {
       message: 'MoMo payment confirmed successfully',
       data: {
         registrationCode: registration.registration_code,
-        paymentStatus: 'paid',
-        assignedCommittee: committee,
-        assignedCountry: country
+        paymentStatus: 'paid'
       }
     });
 
