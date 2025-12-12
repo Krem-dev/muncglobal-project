@@ -141,10 +141,9 @@ const ConferencePage = () => {
               </p>
               <ul className="text-gray-700 mb-4 list-disc pl-5 space-y-2">
                 <li><span className="font-semibold">Forge Sustainable Solutions:</span> In UNEP and ECOFIN, examine policies on circular economies, biodiversity protection, and economic recovery in developing nations.</li>
-                <li><span className="font-semibold">Champion Human Rights & Inclusion:</span> In UNHRC and SOCHUM, defend digital privacy, indigenous rights and combat misinformation threatening democratic processes.</li>
-                <li><span className="font-semibold">Strengthen Global Health & Food Security:</span> In WHO, WFP, and UNFPA, strategize to curb antimicrobial resistance, expand reproductive health access and address malnutrition.</li>
-                <li><span className="font-semibold">Advance Science, Technology & Security:</span> In CSTD, DISEC, IAEA, and the UNSC, shape frameworks for AI and cybersecurity, ethical autonomous weapons oversight and nuclear non-proliferation.</li>
-                <li><span className="font-semibold">Promote Education, Culture & Refugee Protection:</span> In UNESCO, UNHCR, and ECOSOC, facilitate cultural restitution, protect refugees, and ensure clean water and sanitation for all.</li>
+                <li><span className="font-semibold">Champion Human Rights & Inclusion:</span> In SOCHUM, defend digital privacy, indigenous rights and combat misinformation threatening democratic processes.</li>
+                <li><span className="font-semibold">Strengthen Global Health:</span> In WHO, strategize to curb antimicrobial resistance and expand global health initiatives.</li>
+                <li><span className="font-semibold">Advance Science, Technology & Security:</span> In DISEC, shape frameworks for ethical autonomous weapons oversight and international security.</li>
               </ul>
               <p className="text-gray-700">
                 Through formal debate, moderated and unmoderated caucuses, and resolution drafting, you will hone research, public speaking, and negotiation skills—ultimately crafting actionable resolutions that reflect Ghana's leadership in youth diplomacy. Unite. Debate. Transform. Join us in charting a resilient tomorrow for all.
@@ -157,7 +156,7 @@ const ConferencePage = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span>13 specialized committees covering key global issues</span>
+                  <span>5 specialized committees covering key global issues</span>
                 </li>
                 <li className="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
