@@ -164,7 +164,7 @@ const Navbar = () => {
                     className="block w-full py-3 bg-gradient-to-r from-yellow-300 to-yellow-300 text-teal-500 font-medium rounded-lg text-center hover:shadow-md transition-all duration-300"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Register for MUNC-GH 2025
+                    Register for MUNC-GH 2027
                   </Link>
                 </motion.div>
               </nav>

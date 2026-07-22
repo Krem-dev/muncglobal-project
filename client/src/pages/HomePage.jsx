@@ -22,7 +22,7 @@ const HomePage = () => {
           <div 
             className="w-full h-full bg-cover bg-center"
             style={{ 
-              backgroundImage: "url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
+              backgroundImage: "url('/images/background.JPG')",
             }}
           >
             <div className="absolute inset-0 bg-teal-500 bg-opacity-70"></div>
@@ -45,7 +45,7 @@ const HomePage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
-                MUNCGLOBAL
+                MUNC-GLOBAL
               </motion.h1>
               <motion.h2 
                 className="text-2xl md:text-3xl font-semibold mb-6 text-yellow-300"
@@ -73,35 +73,9 @@ const HomePage = () => {
                   Explore Programs
                 </Link>
                 <Link to="/registration" className="btn btn-outline border-white text-white hover:bg-yellow-300 hover:text-teal-500">
-                  Register for MUNC-GH 2026
+                  Register for MUNC-GH 2027
                 </Link>
               </motion.div>
-              
-              {/* Countdown Timer */}
-              <motion.div
-                className="mt-12 max-w-xl mx-auto mb-8 bg-white bg-opacity-90 p-5 rounded-lg shadow-lg border-2 border-yellow-300"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.0 }}
-              >
-                <h3 className="text-lg font-semibold mb-3 text-teal-700 text-center">Conference Begins In:</h3>
-                <CountdownContainer variant="full" className="justify-center" />
-              </motion.div>
-            </motion.div>
-            
-            {/* Conference Flyer */}
-            <motion.div
-              className="mt-4 mb-16 md:mt-0 md:mb-0 flex justify-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-            >
-              <img 
-                src="/images/new-flyer.jpg" 
-                alt="MUNCGLOBAL Conference Flyer" 
-                className="rounded-lg shadow-xl w-full max-w-[260px] sm:max-w-[300px] md:max-w-[380px] lg:max-w-[450px] h-auto transform hover:scale-105 transition-transform duration-300"
-                style={{ maxHeight: "75vh" }}
-              />
             </motion.div>
           </div>
         </div>
@@ -249,7 +223,7 @@ const HomePage = () => {
             >
               <div className="h-48 bg-gray-200">
                 <img 
-                  src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                  src="/images/leadership.JPG" 
                   alt="Leadership Academy" 
                   className="w-full h-full object-cover"
                 />
@@ -276,7 +250,7 @@ const HomePage = () => {
             >
               <div className="h-48 bg-gray-200">
                 <img 
-                  src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                  src="/images/culture.JPG" 
                   alt="Cultural Exchange" 
                   className="w-full h-full object-cover"
                 />
@@ -303,7 +277,7 @@ const HomePage = () => {
             >
               <div className="h-48 bg-gray-200">
                 <img 
-                  src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                  src="/images/community.JPG" 
                   alt="Community Projects" 
                   className="w-full h-full object-cover"
                 />
@@ -339,7 +313,7 @@ const HomePage = () => {
               variants={slideUp}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">MUNC-GH 2026</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">MUNC-GH 2027</h2>
               <h3 className="text-xl md:text-2xl font-semibold mb-4 text-yellow-300">
                 "Securing the Future through Innovation and Inclusion"
               </h3>
@@ -361,11 +335,11 @@ const HomePage = () => {
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span>January 1-4, 2026</span>
+                  <span>January 1-4, 2027</span>
                 </div>
               </div>
               <p className="mb-8">
-                Join us for the annual Model United Nations Conference Ghana (MUNC-GH) 2026, 
+                Join us for the annual Model United Nations Conference Ghana (MUNC-GH) 2027, 
                 where young leaders from across the globe gather to address pressing global challenges 
                 through diplomatic dialogue and innovative solutions.
               </p>
@@ -385,7 +359,7 @@ const HomePage = () => {
               className="rounded-lg overflow-hidden shadow-xl"
             >
               <img 
-                src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                src="/images/event.JPG" 
                 alt="MUNC-GH Conference" 
                 className="w-full h-full object-cover"
               />
@@ -410,7 +384,7 @@ const HomePage = () => {
               Be part of a global movement of young leaders committed to making a positive impact in their communities.
             </p>
             <Link to="/registration" className="btn bg-teal-500 hover:bg-teal-600 text-white text-lg px-8 py-3">
-              Register for MUNC-GH 2026
+              Register for MUNC-GH 2027
             </Link>
           </motion.div>
         </div>

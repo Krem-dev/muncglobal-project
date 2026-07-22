@@ -117,7 +117,7 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
         </div>
         <h3 className="text-2xl font-bold text-teal-600 mb-2">Registration Successful!</h3>
         <p className="text-gray-600">
-          Thank you for registering for MUNCGLOBAL Conference 2026. {paymentData || paymentStatus === 'success' ? 'Your payment has been received.' : 'Please proceed to payment to complete your registration.'}
+          Thank you for registering for MUNCGLOBAL Conference 2027. {paymentData || paymentStatus === 'success' ? 'Your payment has been received.' : 'Please proceed to payment to complete your registration.'}
         </p>
       </div>
       
@@ -326,7 +326,7 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
             <div>
               <p className="font-medium">Save the Date</p>
               <p className="text-sm text-gray-600">
-                Mark your calendar for MUNCGLOBAL Conference 2026. We'll send you reminders as the date approaches.
+                Mark your calendar for MUNCGLOBAL Conference 2027. We'll send you reminders as the date approaches.
               </p>
             </div>
           </li>

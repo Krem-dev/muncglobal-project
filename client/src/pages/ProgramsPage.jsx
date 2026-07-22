@@ -34,21 +34,21 @@ const ProgramsPage = () => {
       title: 'Leadership Academy',
       status: 'active',
       description: 'Our flagship program that develops essential leadership skills through workshops, mentoring, and practical experiences. Participants learn effective communication, strategic thinking, team management, and ethical leadership principles.',
-      image: '/images/programs/leadership-academy.jpg'
+      image: '/images/leadership.JPG'
     },
     {
       id: 'cultural-exchange',
       title: 'Cultural Exchange',
       status: 'active',
       description: 'Cross-cultural programs that connect young leaders from different countries to share experiences and perspectives. These exchanges foster international understanding and build global networks.',
-      image: '/images/programs/cultural-exchange.jpg'
+      image: '/images/culture.JPG'
     },
     {
       id: 'community-projects',
       title: 'Community Projects',
       status: 'active',
       description: 'Initiatives that address local challenges through youth-led solutions. Participants identify community needs, develop action plans, and implement sustainable projects with measurable impact.',
-      image: '/images/programs/community-projects.jpg'
+      image: '/images/community.JPG'
     },
     {
       id: 'youth-peacebuilding',
@@ -149,12 +149,19 @@ const ProgramsPage = () => {
                 variants={itemVariants}
               >
                 <div className="h-48 bg-gray-200 relative">
-                  {/* This would be replaced with actual images in production */}
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                    <span className="text-4xl">{program.title.charAt(0)}</span>
-                  </div>
+                  {program.image ? (
+                    <img
+                      src={program.image}
+                      alt={program.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                      <span className="text-4xl">{program.title.charAt(0)}</span>
+                    </div>
+                  )}
                   {program.status === 'coming-soon' && (
-                    <div className="absolute top-4 right-4 border-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    <div className="absolute top-4 right-4 border-teal-500 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                       Coming Soon
                     </div>
                   )}
@@ -193,7 +200,7 @@ const ProgramsPage = () => {
                     <span className="text-4xl">{foundation.title.charAt(0)}</span>
                   </div>
                   {foundation.status === 'coming-soon' && (
-                    <div className="absolute top-4 right-4 border-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    <div className="absolute top-4 right-4 border-teal-500 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                       Coming Soon
                     </div>
                   )}
@@ -205,7 +212,7 @@ const ProgramsPage = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span>Launching in 2026</span>
+                    <span>Launching in 2027</span>
                   </div>
                 </div>
               </motion.div>

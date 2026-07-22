@@ -59,7 +59,7 @@ const NotFoundPage = () => {
                   <Link to="/about" className="text-blue-600 hover:underline">About Us</Link>
                 </li>
                 <li>
-                  <Link to="/conference" className="text-blue-600 hover:underline">MUNC-GH 2025 Conference</Link>
+                  <Link to="/conference" className="text-blue-600 hover:underline">MUNC-GH 2027 Conference</Link>
                 </li>
                 <li>
                   <Link to="/registration" className="text-blue-600 hover:underline">Registration</Link>

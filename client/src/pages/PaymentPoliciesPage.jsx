@@ -39,7 +39,7 @@ const PaymentPoliciesPage = () => {
           <motion.div className="text-center mb-12" variants={itemVariants}>
             <h2 className="text-3xl md:text-4xl font-bold text-teal-800 mb-4">Payment Policies</h2>
             <p className="text-gray-700">
-              Important information regarding registration fees, payment methods, and policies for MUNCGLOBAL Conference 2025.
+              Important information regarding registration fees, payment methods, and policies for MUNCGLOBAL Conference 2027.
             </p>
           </motion.div>
 
@@ -152,7 +152,7 @@ const PaymentPoliciesPage = () => {
               <div className="bg-white p-5 border-l-4 border-red-600 shadow-sm">
                 <h4 className="font-semibold text-gray-800 mb-2">Refund Policy</h4>
                 <p className="text-gray-700 text-sm">
-                  Registration fees are non-refundable after October 5, 2025. Cancellations before this date will 
+                  Registration fees are non-refundable after October 5, 2026. Cancellations before this date will 
                   be subject to a 30% administrative fee. All refund requests must be submitted in writing to 
                   <a href="mailto:info@muncglobal.com" className="text-teal-600 hover:underline"> info@muncglobal.com</a>.
                 </p>
@@ -160,7 +160,7 @@ const PaymentPoliciesPage = () => {
               {/* <div className="bg-white p-5 border-l-4 border-green-600 shadow-sm">
                 <h4 className="font-semibold text-gray-800 mb-2">Transfer Policy</h4>
                 <p className="text-gray-700 text-sm">
-                  Registration may be transferred to another individual at no additional cost until October 15, 2025. 
+                  Registration may be transferred to another individual at no additional cost until October 15, 2026. 
                   Transfer requests must be submitted in writing with the new delegate's information.
                 </p>
               </div> */}
@@ -172,7 +172,7 @@ const PaymentPoliciesPage = () => {
             className="text-center mt-12"
             variants={itemVariants}
           >
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Ready to secure your spot at MUNCGLOBAL Conference 2026?</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Ready to secure your spot at MUNCGLOBAL Conference 2027?</h3>
             <Link 
               to="/registration" 
               className="inline-block px-8 py-3 bg-teal-700 text-white font-medium rounded-md hover:bg-teal-800 transition-colors"

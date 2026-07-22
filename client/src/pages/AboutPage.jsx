@@ -26,7 +26,7 @@ const AboutPage = () => {
   };
 
   return (
-    <div className="bg-white py-16">
+    <div className="bg-gradient-to-b from-white via-teal-50/40 to-white py-16">
       <motion.div 
         className="container mx-auto px-4"
         initial="hidden"
@@ -34,77 +34,101 @@ const AboutPage = () => {
         viewport={{ once: true, amount: 0.2 }}
         variants={containerVariants}
       >
-        {/* About Our Organization */}
-        <motion.div className="mb-16" variants={itemVariants}>
-          <h2 className="text-3xl md:text-4xl font-bold text-teal-800 mb-6">About Our Organization</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                MUNCGLOBAL is an organization that nurtures the leadership qualities in the youth through immersive diplomatic simulations, collaborative leadership workshops, and empowers the next generation of leaders through innovative programmes, mentorship and community‑driven initiatives.
-              </p>
-            </div>
-            <div className="bg-gray-100 p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-green-700 mb-3">Our Core Values</h3>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <span className="text-teal-600 mr-2">•</span>
-                  <span><strong>Excellence</strong> - Striving for the highest standards in all our endeavors</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-teal-600 mr-2">•</span>
-                  <span><strong>Integrity</strong> - Acting with honesty and ethical principles</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-teal-600 mr-2">•</span>
-                  <span><strong>Innovation</strong> - Embracing creativity and forward-thinking approaches</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-teal-600 mr-2">•</span>
-                  <span><strong>Inclusivity</strong> - Ensuring diversity and equal opportunity for all</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-teal-600 mr-2">•</span>
-                  <span><strong>Global Citizenship</strong> - Fostering awareness and responsibility for global issues</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Mission and Vision */}
-        <motion.div className="mb-16" variants={itemVariants}>
-          <div className="grid md:grid-cols-2 gap-8 items-stretch">
-            <div className="bg-teal-50 p-6 rounded-lg shadow-md min-h-[260px] h-full flex flex-col">
-              <h2 className="text-2xl md:text-3xl font-bold text-teal-800 mb-4">Our Mission</h2>
-              <p className="text-gray-700 leading-relaxed">
-                To provide a dynamic platform for the youth of the world to learn about the United Nations and diplomacy. Through our conferences and training, MUNCGLOBAL cultivates a deep understanding of international affairs in society. We equip the young generation with the needed skills and information to tackle interrelated worldwide issues.
-              </p>
-            </div>
-            <div className="bg-green-50 p-6 rounded-lg shadow-md min-h-[260px] h-full flex flex-col">
-              <h2 className="text-2xl md:text-3xl font-bold text-green-700 mb-4">Our Vision</h2>
-              <p className="text-gray-700 leading-relaxed">
-                We envisage a world where the youth is empowered to lead, innovate and improve reasonable solutions to global challenges through diplomatic skills.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Impact */}
-        <motion.div className="mb-16" variants={itemVariants}>
-          <h2 className="text-3xl md:text-4xl font-bold text-teal-800 mb-6">Our Impact</h2>
-          <div className="grid grid-cols-2 gap-6 items-stretch">
-            <div className="bg-white p-6 rounded-lg shadow-md text-center min-h-[180px] h-full flex flex-col justify-center">
-              <h3 className="text-3xl font-bold text-teal-600 mb-2">500+</h3>
-              <p className="text-gray-700">Youth Empowered</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-md text-center min-h-[180px] h-full flex flex-col justify-center">
-              <h3 className="text-3xl font-bold text-teal-600 mb-2">100+</h3>
-              <p className="text-gray-700">Leaders Trained</p>
-            </div>
-          </div>
-          <p className="text-gray-700 mt-6 leading-relaxed">
-            Through mentorship and training, we have helped sharpened the analytical, negotiation, public speaking and leadership skills of the youth. We have broadened their global outlook to shape the next international policies that will govern them.
+        <motion.div className="mx-auto max-w-4xl text-center mb-14" variants={itemVariants}>
+          <span className="inline-flex items-center rounded-full border border-teal-200 bg-teal-50 px-4 py-1 text-sm font-medium text-teal-700 mb-4">
+            About MUNCGLOBAL
+          </span>
+          <h2 className="text-3xl md:text-5xl font-bold text-teal-800 mb-4">
+            Building confident young leaders for a connected world
+          </h2>
+          <p className="text-lg text-gray-700 leading-relaxed">
+            MUNCGLOBAL empowers young people through diplomacy, leadership development, and community-driven impact. We create spaces where curiosity becomes confidence and ideas become action.
           </p>
+        </motion.div>
+
+        <motion.div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] mb-16" variants={itemVariants}>
+          <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm">
+            <p className="text-sm uppercase tracking-[0.3em] text-teal-600 mb-3">Who we are</p>
+            <h3 className="text-2xl font-semibold text-teal-800 mb-4">
+              We equip youth to think globally and lead locally.
+            </h3>
+            <p className="text-gray-700 leading-relaxed mb-5">
+              Our programs bring together students and young professionals to explore international affairs, strengthen public speaking, and develop practical solutions for the challenges facing their communities.
+            </p>
+            <div className="space-y-3 text-gray-700">
+              <div className="flex items-start gap-3">
+                <span className="mt-2 h-2.5 w-2.5 rounded-full bg-teal-600" />
+                <span>We provide immersive Model UN experiences that build analytical thinking and diplomacy.</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="mt-2 h-2.5 w-2.5 rounded-full bg-teal-600" />
+                <span>We create inclusive spaces for collaboration, mentorship, and personal growth.</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="mt-2 h-2.5 w-2.5 rounded-full bg-teal-600" />
+                <span>We inspire young leaders to turn ideas into meaningful action at home and abroad.</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-gradient-to-br from-teal-800 to-teal-600 p-8 text-white shadow-lg">
+            <p className="text-sm uppercase tracking-[0.3em] text-teal-100 mb-3">Our values</p>
+            <ul className="space-y-3 text-sm leading-relaxed">
+              <li className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3"><strong>Excellence</strong> — we deliver meaningful experiences with care and discipline.</li>
+              <li className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3"><strong>Integrity</strong> — we lead with respect, accountability, and honesty.</li>
+              <li className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3"><strong>Innovation</strong> — we encourage bold thinking and future-ready solutions.</li>
+              <li className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3"><strong>Inclusivity</strong> — we welcome diverse voices and shared opportunity.</li>
+            </ul>
+          </div>
+        </motion.div>
+
+        <motion.div className="grid gap-8 md:grid-cols-2 mb-16" variants={itemVariants}>
+          <div className="rounded-3xl bg-teal-50 p-8 shadow-sm">
+            <p className="text-sm uppercase tracking-[0.3em] text-teal-600 mb-3">Mission</p>
+            <h3 className="text-2xl font-semibold text-teal-800 mb-4">
+              To equip young people with the voice, insight, and courage to lead meaningful change.
+            </h3>
+            <p className="text-gray-700 leading-relaxed">
+              Through immersive Model UN experiences, mentorship, and community programs, we help learners build confidence and turn ideas into lasting impact.
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-green-50 p-8 shadow-sm">
+            <p className="text-sm uppercase tracking-[0.3em] text-green-700 mb-3">Vision</p>
+            <h3 className="text-2xl font-semibold text-green-800 mb-4">
+              A generation of youth who lead with empathy, innovation, and purpose.
+            </h3>
+            <p className="text-gray-700 leading-relaxed">
+              We imagine a future where young people from every background can participate in global conversations and shape more inclusive, sustainable communities.
+            </p>
+          </div>
+        </motion.div>
+
+        <motion.div className="rounded-[2rem] border border-teal-100 bg-gradient-to-br from-teal-800 via-teal-700 to-teal-900 p-8 text-white shadow-lg" variants={itemVariants}>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-teal-100 mb-2">Our impact</p>
+              <h3 className="text-2xl md:text-3xl font-semibold">Shaping confident leaders and stronger communities</h3>
+            </div>
+            <p className="max-w-2xl text-teal-50/90 leading-relaxed">
+              Every program is designed to strengthen confidence, public speaking, collaboration, and civic engagement in ways that last beyond the event.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-6 text-center backdrop-blur-sm">
+              <h4 className="text-3xl font-bold text-white mb-2">500+</h4>
+              <p className="text-sm text-teal-50/90">Youth engaged in leadership and civic programs</p>
+            </div>
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-6 text-center backdrop-blur-sm">
+              <h4 className="text-3xl font-bold text-white mb-2">100+</h4>
+              <p className="text-sm text-teal-50/90">Young leaders trained through workshops and mentorship</p>
+            </div>
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-6 text-center backdrop-blur-sm">
+              <h4 className="text-3xl font-bold text-white mb-2">30+</h4>
+              <p className="text-sm text-teal-50/90">Schools and communities reached across the region</p>
+            </div>
+          </div>
         </motion.div>
       </motion.div>
     </div>

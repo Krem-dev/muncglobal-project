@@ -621,7 +621,7 @@ const RegistrationForm = ({ onSubmit }) => {
                 {...register('howHeardOther')}
                 className={`w-full px-3 py-2 border rounded-md ${errors.howHeardOther ? 'border-red-500' : 'border-gray-300'}`}
                 rows="2"
-                placeholder="Please tell us how you heard about MUNC-GH 2025"
+                placeholder="Please tell us how you heard about MUNC-GH 2027"
               ></textarea>
               {errors.howHeardOther && (
                 <p className="mt-1 text-sm text-red-600">{errors.howHeardOther.message}</p>
