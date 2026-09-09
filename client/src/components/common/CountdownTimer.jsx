@@ -25,12 +25,10 @@ const CountdownTimer = ({ targetDate, className = '', onComplete = null }) => {
   });
 
   useEffect(() => {
-    // Function to calculate time remaining
     const calculateTimeRemaining = () => {
       const now = new Date().getTime();
       const difference = targetDateTime - now;
-      
-      // Check if countdown is complete
+
       if (difference <= 0) {
         setTimeRemaining({
           days: 0,
@@ -39,20 +37,18 @@ const CountdownTimer = ({ targetDate, className = '', onComplete = null }) => {
           seconds: 0,
           isComplete: true
         });
-        
-        // Call onComplete callback if provided
-        if (onComplete && !timeRemaining.isComplete) {
+
+        if (onComplete) {
           onComplete();
         }
         return;
       }
-      
-      // Calculate time units
+
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      
+
       setTimeRemaining({
         days,
         hours,
@@ -61,16 +57,13 @@ const CountdownTimer = ({ targetDate, className = '', onComplete = null }) => {
         isComplete: false
       });
     };
-    
-    // Calculate initial time remaining
+
     calculateTimeRemaining();
-    
-    // Set up interval to update countdown
+
     const intervalId = setInterval(calculateTimeRemaining, 1000);
-    
-    // Clean up interval on unmount
+
     return () => clearInterval(intervalId);
-  }, [targetDateTime, onComplete, timeRemaining.isComplete]);
+  }, [targetDateTime, onComplete]);
   
   // Format numbers to always have two digits
   const formatNumber = (num) => {

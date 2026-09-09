@@ -6,7 +6,7 @@ import PaymentStep from '../components/Registration/PaymentStep';
 import SuccessStep from '../components/Registration/SuccessStep';
 
 const RegistrationPage = () => {
-  const registrationsOpen = false;
+  const registrationsOpen = true;
 
   // Use our custom registration hook
   const {
@@ -30,10 +30,10 @@ const RegistrationPage = () => {
         >
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold text-teal-500 mb-4">
-              Registration opening soon
+              Register for MUNC-GH 2027
             </h2>
             <p className="text-gray-700 max-w-2xl mx-auto">
-              We’re preparing the registration window for MUNC-GH 2027 and will announce the opening date shortly.
+              Complete your registration and secure your place for the conference.
             </p>
           </div>
 
@@ -87,41 +87,26 @@ const RegistrationPage = () => {
           )}
 
           <div className="rounded-[2rem] border border-yellow-200 bg-gradient-to-br from-yellow-50 via-white to-teal-50 p-8 shadow-sm">
-            {!registrationsOpen ? (
-              <div className="text-center">
-                <p className="text-sm uppercase tracking-[0.3em] text-yellow-700 mb-3">Coming soon</p>
-                <h3 className="text-2xl md:text-3xl font-semibold text-teal-800 mb-4">
-                  Registration for MUNC-GH 2027 will open soon
-                </h3>
-                <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto mb-6">
-                  We’re preparing the registration experience and will share the official opening date shortly. In the meantime, you can explore our past conference highlights and committee archives.
-                </p>
-                <div className="rounded-2xl border border-teal-100 bg-teal-50 px-5 py-4 text-sm text-teal-800 inline-block">
-                  Stay tuned for updates on the official registration launch.
-                </div>
-              </div>
-            ) : (
-              <>
-                {step === 1 && (
-                  <RegistrationForm onSubmit={handleFormSubmit} />
-                )}
-                
-                {step === 2 && (
-                  <PaymentStep 
-                    formData={formData}
-                    onPaymentComplete={handlePaymentComplete}
-                  />
-                )}
-                
-                {step === 3 && (
-                  <SuccessStep 
-                    delegateId={delegateId}
-                    formData={formData}
-                    paymentData={paymentData}
-                  />
-                )}
-              </>
-            )}
+            <>
+              {step === 1 && (
+                <RegistrationForm onSubmit={handleFormSubmit} />
+              )}
+
+              {step === 2 && (
+                <PaymentStep 
+                  formData={formData}
+                  onPaymentComplete={handlePaymentComplete}
+                />
+              )}
+
+              {step === 3 && (
+                <SuccessStep 
+                  delegateId={delegateId}
+                  formData={formData}
+                  paymentData={paymentData}
+                />
+              )}
+            </>
           </div>
         </motion.div>
       </div>
