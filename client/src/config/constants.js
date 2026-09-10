@@ -9,6 +9,13 @@ export const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://muncglobal
 
 export const REGISTRATION_FEE = Number.isFinite(envRegistrationFee) && envRegistrationFee > 0 ? envRegistrationFee : 970;
 
+export const REGISTRATION_FEE_BY_LEVEL = {
+  BASIC_SCHOOL: 970,
+  SECONDARY: 980,
+  TERTIARY: 1000,
+  DEFAULT: 970
+};
+
 // Date constants
 export const REGISTRATION_DEADLINE = 'December 26, 2026';
 export const REFUND_POLICY_DATE = 'December 16, 2026';
