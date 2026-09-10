@@ -114,7 +114,9 @@ const RegistrationForm = ({ onSubmit }) => {
         registrationCode
       };
       
-      const registrationResponse = await axios.post(`${API_BASE_URL}/registration`, registrationData);
+      const registrationResponse = await axios.post(`${API_BASE_URL}/registration`, registrationData, {
+        timeout: 15000
+      });
       
       if (registrationResponse.data.status !== 'success') {
         throw new Error(registrationResponse.data.message || 'Registration failed');
@@ -126,8 +128,19 @@ const RegistrationForm = ({ onSubmit }) => {
       
       toast.success('Registration created! Proceeding to payment...');
     } catch (error) {
-      console.error('Registration error:', error);
-      const errorMessage = error.response?.data?.message || 'There was an error submitting your registration. Please try again.';
+      console.error('Registration error details:', {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        responseData: error.response?.data,
+        request: error.request
+      });
+
+      const errorMessage = error.response?.data?.message
+        || (error.code === 'ECONNABORTED' ? 'The registration request timed out. Please try again.' : '')
+        || error.message
+        || 'There was an error submitting your registration. Please try again.';
+
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);

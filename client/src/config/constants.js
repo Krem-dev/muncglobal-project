@@ -2,10 +2,12 @@
  * Application constants
  */
 
+const envRegistrationFee = Number(import.meta.env.VITE_REGISTRATION_FEE ?? 970);
+
 // API base URL - uses environment variable if available, otherwise defaults to localhost
 export const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://muncglobal-project-server.onrender.com/api').trim();
 
-export const REGISTRATION_FEE = 970;
+export const REGISTRATION_FEE = Number.isFinite(envRegistrationFee) && envRegistrationFee > 0 ? envRegistrationFee : 970;
 
 // Date constants
 export const REGISTRATION_DEADLINE = 'December 26, 2026';
