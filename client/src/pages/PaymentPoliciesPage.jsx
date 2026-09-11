@@ -39,7 +39,7 @@ const PaymentPoliciesPage = () => {
           <motion.div className="text-center mb-12" variants={itemVariants}>
             <h2 className="text-3xl md:text-4xl font-bold text-teal-800 mb-4">Payment Policies</h2>
             <p className="text-gray-700">
-              Important information regarding registration fees, payment methods, and policies for MUNCGLOBAL Conference 2027.
+              Important information regarding registration fees, payment methods, and policies for MUNC-GLOBAL Conference 2027.
             </p>
           </motion.div>
 
@@ -86,7 +86,7 @@ const PaymentPoliciesPage = () => {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-gray-500">Account Name</p>
-                      <p className="font-medium">MUNCGLOBAL</p>
+                      <p className="font-medium">MUNC-GLOBAL</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">MoMo Number</p>
@@ -172,7 +172,7 @@ const PaymentPoliciesPage = () => {
             className="text-center mt-12"
             variants={itemVariants}
           >
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Ready to secure your spot at MUNCGLOBAL Conference 2027?</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Ready to secure your spot at MUNC-GLOBAL Conference 2027?</h3>
             <Link 
               to="/registration" 
               className="inline-block px-8 py-3 bg-teal-700 text-white font-medium rounded-md hover:bg-teal-800 transition-colors"

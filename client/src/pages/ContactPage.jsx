@@ -119,7 +119,7 @@ const ContactPage = () => {
           <motion.div className="text-center mb-12" variants={itemVariants}>
             <h2 className="text-3xl md:text-4xl font-bold text-teal-500 mb-4">Contact Us</h2>
             <p className="text-gray-700 max-w-2xl mx-auto">
-              Have questions about MUNCGLOBAL or our programs? We'd love to hear from you! 
+              Have questions about MUNC-GLOBAL or our programs? We'd love to hear from you! 
               Reach out using the contact information below or send us a message using the form.
             </p>
           </motion.div>

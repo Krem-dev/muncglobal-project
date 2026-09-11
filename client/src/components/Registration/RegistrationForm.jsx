@@ -655,7 +655,7 @@ const RegistrationForm = ({ onSubmit }) => {
             </div>
             <div className="ml-3 text-sm">
               <label htmlFor="agreeTerms" className="font-medium text-gray-700">
-                Declaration: By submitting this form, I agree to the <a href="#" className="text-teal-500 hover:underline">terms and conditions</a> of MUNCGLOBAL *
+                Declaration: By submitting this form, I agree to the <a href="#" className="text-teal-500 hover:underline">terms and conditions</a> of MUNC-GLOBAL *
               </label>
               {errors.agreeTerms && (
                 <p className="mt-1 text-sm text-red-600">{errors.agreeTerms.message}</p>

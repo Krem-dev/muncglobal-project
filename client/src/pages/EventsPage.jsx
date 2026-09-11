@@ -62,7 +62,7 @@ const EventsPage = () => {
               </div>
               <h3 className="text-xl font-bold text-teal-800 mb-2">Youth Diplomacy Workshop</h3>
               <p className="text-gray-700 mb-6">
-                Join our intensive two-day workshop focused on negotiation tactics, public speaking, and resolution drafting. Perfect for both beginners and experienced delegates looking to prepare for the MUNCGLOBAL Conference 2027.
+                Join our intensive two-day workshop focused on negotiation tactics, public speaking, and resolution drafting. Perfect for both beginners and experienced delegates looking to prepare for the MUNC-GLOBAL Conference 2027.
                 <br /><br />
                 <strong>Date:</strong> May 20-21, 2027<br />
                 <strong>Location:</strong> Kwame Nkrumah University of Science and Technology<br />
@@ -143,7 +143,7 @@ const EventsPage = () => {
                 </button>
               </form>
               <p className="text-xs text-gray-500 mt-2">
-                We respect your privacy. Your email will only be used for MUNCGLOBAL Conference and program updates.
+                We respect your privacy. Your email will only be used for MUNC-GLOBAL Conference and program updates.
               </p>
             </div>
           </motion.div>

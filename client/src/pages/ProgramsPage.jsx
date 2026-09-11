@@ -102,7 +102,7 @@ const ProgramsPage = () => {
         >
           <h2 className="text-3xl md:text-4xl font-bold text-teal-600 mb-4">Our Programs & Foundations</h2>
           <p className="text-gray-700 max-w-3xl mx-auto">
-            Discover the various initiatives through which MUNCGLOBAL empowers youth and creates positive change in communities around the world.
+            Discover the various initiatives through which MUNC-GLOBAL empowers youth and creates positive change in communities around the world.
           </p>
         </motion.div>
 

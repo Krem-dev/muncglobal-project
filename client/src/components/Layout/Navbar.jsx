@@ -53,11 +53,11 @@ const Navbar = () => {
           >
             <img 
               src="/images/logo.png" 
-              alt="MUNCGLOBAL Logo" 
+              alt="MUNC-GLOBAL Logo" 
               className="h-10 mr-2 transform group-hover:scale-105 transition-transform duration-300"
             />
             <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-teal-500">
-              MUNCGLOBAL
+              MUNC-GLOBAL
             </h1>
           </motion.div>
         </Link>

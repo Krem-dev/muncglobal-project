@@ -111,7 +111,7 @@ const HomePage = () => {
           >
             <h2 className="section-title">About Our Organization</h2>
             <p className="section-subtitle max-w-3xl mx-auto">
-              MUNCGLOBAL is an organization that nurtures the leadership qualities in the youth through immersive diplomatic simulations, collaborative leadership workshops, and empowers the next generation of leaders through innovative programmes, mentorship and community‑driven initiatives.
+              MUNC-GLOBAL is an organization that nurtures the leadership qualities in the youth through immersive diplomatic simulations, collaborative leadership workshops, and empowers the next generation of leaders through innovative programmes, mentorship and community‑driven initiatives.
             </p>
           </motion.div>
 
@@ -131,7 +131,7 @@ const HomePage = () => {
               </div>
               <h3 className="text-xl font-bold mb-2">Our Mission</h3>
               <p className="text-gray-600">
-                To provide a dynamic platform for the youth of the world to learn about the United Nations and diplomacy. Through our conferences and training, MUNCGLOBAL cultivates a deep understanding of international affairs in society. We equip the young generation with the needed skills and information to tackle interrelated worldwide issues.
+                To provide a dynamic platform for the youth of the world to learn about the United Nations and diplomacy. Through our conferences and training, MUNC-GLOBAL cultivates a deep understanding of international affairs in society. We equip the young generation with the needed skills and information to tackle interrelated worldwide issues.
               </p>
             </motion.div>
 
@@ -315,7 +315,7 @@ const HomePage = () => {
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">MUNC-GH 2027</h2>
               <h3 className="text-xl md:text-2xl font-semibold mb-4 text-yellow-300">
-                "Securing the Future through Innovation and Inclusion"
+                "Advancing Global Progress Through Innovation, Cooperation, and Action"
               </h3>
               
               {/* Countdown Timer */}

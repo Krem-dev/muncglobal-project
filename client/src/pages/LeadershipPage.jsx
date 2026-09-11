@@ -44,7 +44,7 @@ const LeadershipPage = () => {
     {
       name: "Kwadwo Marfo",
       role: "Operations Manager",
-      description: "Focused on delivery, coordination, and operational excellence across all MUNCGLOBAL events.",
+      description: "Focused on delivery, coordination, and operational excellence across all MUNC-GLOBAL events.",
       image: '/images/leadership.JPG',
       tags: ['Event Operations', 'Logistics & Coordination']
     }
