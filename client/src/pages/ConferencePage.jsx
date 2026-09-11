@@ -69,13 +69,13 @@ const ConferencePage = () => {
               transition={{ duration: 0.8 }}
             >
               <p className="text-sm uppercase tracking-widest text-yellow-200 mb-4">Past Conference Archive</p>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">MUNC-GH 2025 Conference</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">MUNC-GH 2026 Conference</h1>
               <p className="text-xl md:text-2xl font-light mb-6">"Securing the Future through Innovation and Inclusion"</p>
               <p className="max-w-3xl text-gray-200 mb-8">
-                Explore the 2025 conference experience with gallery moments, committee topics, background guides, awardees, dais members, and delegate stories.
+                Explore the 2026 conference experience with gallery moments, committee topics, background guides, awardees, dais members, and delegate stories.
               </p>
               <div className="flex flex-wrap gap-4">
-                <a href="#explore-2025" className="btn bg-yellow-300 text-teal-800 hover:bg-yellow-400">Explore 2025</a>
+                <a href="#explore-2026" className="btn bg-yellow-300 text-teal-800 hover:bg-yellow-400">Explore 2026</a>
                 <Link to="/registration" className="btn bg-white text-teal-700 hover:bg-teal-100">Register for 2027</Link>
               </div>
             </motion.div>
@@ -88,7 +88,7 @@ const ConferencePage = () => {
             >
               <img
                 src="/images/event.JPG"
-                alt="MUNC-GH 2025 Conference"
+                alt="MUNC-GH 2026 Conference"
                 className="w-full h-full object-cover min-h-[360px]"
               />
             </motion.div>
@@ -108,12 +108,12 @@ const ConferencePage = () => {
             <motion.div variants={itemVariants}>
               <h2 className="text-3xl font-bold text-teal-800 mb-6">What You Can Explore</h2>
               <p className="text-gray-700 mb-6">
-                This conference page preserves the full MUNC-GH 2025 experience while we prepare for future conferences.
+                This conference page preserves the full MUNC-GH 2026 experience while we prepare for future conferences.
               </p>
               <ul className="space-y-4 text-gray-700">
                 <li className="flex items-start gap-3">
                   <span className="mt-1 text-teal-600">•</span>
-                  <span><strong>Gallery</strong> — browse photos and event highlights from the 2025 conference.</span>
+                  <span><strong>Gallery</strong> — browse photos and event highlights from the 2026 conference.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="mt-1 text-teal-600">•</span>
@@ -140,12 +140,12 @@ const ConferencePage = () => {
             <motion.div variants={itemVariants} className="bg-teal-50 rounded-3xl p-10 shadow-lg">
               <h3 className="text-2xl font-semibold text-teal-800 mb-4">Archive Highlights</h3>
               <p className="text-gray-700 mb-4">
-                The 2025 archive preserves official documents, committee guides, photos, and records of the conference.
+                The 2026 archive preserves official documents, committee guides, photos, and records of the conference.
               </p>
               <div className="space-y-4">
                 <div className="rounded-2xl bg-white p-5 shadow-sm">
                   <p className="text-sm uppercase tracking-widest text-teal-600 mb-2">Committee Topics</p>
-                  <p className="text-gray-700">Review committee topics and supporting background materials for the 2025 conference.</p>
+                  <p className="text-gray-700">Review committee topics and supporting background materials for the 2026 conference.</p>
                 </div>
                 <div className="rounded-2xl bg-white p-5 shadow-sm">
                   <p className="text-sm uppercase tracking-widest text-teal-600 mb-2">Resolutions</p>
@@ -170,14 +170,14 @@ const ConferencePage = () => {
             <motion.div variants={itemVariants} className="text-center mb-10">
               <h2 className="text-3xl font-bold text-teal-800 mb-4">Conference Committees</h2>
               <p className="text-gray-700 max-w-3xl mx-auto">
-                MUNCGLOBAL Conference 2025 features 5 diverse committees covering a wide range of global issues. 
+                MUNC-GLOBAL Conference 2026 features 5 diverse committees covering a wide range of global issues. 
                 Delegates will have the opportunity to represent countries and engage in substantive 
                 debates on these topics while developing critical diplomatic and leadership skills.
               </p>
             </motion.div>
             
             <motion.div 
-              id="explore-2025"
+              id="explore-2026"
               className="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
               variants={containerVariants}
             >
@@ -212,7 +212,7 @@ const ConferencePage = () => {
           >
             <h2 className="text-2xl font-bold text-teal-800 mb-4">Prepare for MUNC-GH 2027</h2>
             <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-              While the 2025 archive preserves past conference moments, registration for MUNC-GH 2027 is opening soon.
+              While the 2026 archive preserves past conference moments, registration for MUNC-GH 2027 is opening soon.
               Stay updated and secure your place when registration goes live.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -226,7 +226,7 @@ const ConferencePage = () => {
                 to="/conference" 
                 className="px-8 py-3 bg-white text-teal-700 border border-teal-700 font-medium rounded-md hover:bg-teal-50 transition-colors"
               >
-                Explore 2025 Archive
+                Explore 2026 Archive
               </Link>
             </div>
           </motion.div>

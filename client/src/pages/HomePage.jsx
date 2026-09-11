@@ -53,7 +53,7 @@ const HomePage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
-                Empower Your Tomorrow
+                Advancing Global Progress Through Innovation, Cooperation, and Action
               </motion.h2>
               <motion.p 
                 className="text-lg md:text-xl mb-8 max-w-2xl"

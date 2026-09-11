@@ -25,10 +25,10 @@ const Footer = () => {
             <div className="flex items-center mb-4">
               <img 
                 src="/images/logo.png" 
-                alt="MUNCGLOBAL Logo" 
+                alt="MUNC-GLOBAL Logo" 
                 className="h-12 mr-3"
               />
-              <h2 className="text-2xl font-bold">MUNCGLOBAL</h2>
+              <h2 className="text-2xl font-bold">MUNC-GLOBAL</h2>
             </div>
             <p className="text-gray-300 mb-4">
               Empowering youth through leadership development, cultural exchange, and sustainable impact programs.
@@ -84,16 +84,23 @@ const Footer = () => {
                 <svg className="w-5 h-5 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <a href="mailto:info@muncglobal.com" className="text-white hover:text-yellow-300 transition-colors">info@muncglobal.com</a>
+                <div className="space-y-1">
+                  <a href="mailto:info@muncglobal.com" className="text-white hover:text-yellow-300 transition-colors block">info@muncglobal.com</a>
+                  <a href="mailto:muncglobal@gmail.com" className="text-white hover:text-yellow-300 transition-colors block">muncglobal@gmail.com</a>
+                </div>
               </li>
               <li className="flex items-start">
-                <svg className="w-5 h-5 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                <svg className="w-5 h-5 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M20.52 3.48A11.94 11.94 0 0 0 12 1.5a11.94 11.94 0 0 0-8.52 1.98C1.2 6.08.6 9.02.6 12.02c0 2.72.96 5.32 2.62 7.28L2.5 23l3.84-1.02c1.9.98 4.02 1.46 6.1 1.46 3.02 0 5.96-.6 8.52-1.98A11.94 11.94 0 0 0 20.52 3.48zm-8.52 18.1c-1.8 0-3.57-.48-5.14-1.38l-.36-.2-2.28.6.6-2.22-.24-.36A9.8 9.8 0 0 1 2.4 12c0-2.26.88-4.38 2.48-5.98A9.78 9.78 0 0 1 12 2.4a9.78 9.78 0 0 1 7.12 3.02A9.72 9.72 0 0 1 21.6 12c0 2.72-.94 5.3-2.66 7.2A9.8 9.8 0 0 1 12 21.58zm5.34-7.28c-.29-.15-1.7-.84-1.96-.94-.26-.1-.45-.15-.64.15-.2.3-.76.94-.94 1.14-.17.2-.35.22-.65.07-.3-.15-1.28-.47-2.42-1.5-.9-.8-1.52-1.8-1.7-2.1-.18-.3-.02-.46.14-.63.15-.15.29-.38.43-.57.14-.2.18-.34.28-.56.1-.22.05-.42-.02-.57-.08-.15-.64-1.54-.88-2.12-.23-.57-.47-.49-.64-.5l-.55-.01c-.18 0-.47.06-.7.3-.24.24-1.1 1.08-1.1 2.62 0 1.54 1.12 3.04 1.28 3.25.16.22 2.2 3.34 5.33 4.7.74.32 1.32.52 1.76.66.74.24 1.42.2 1.96.12.6-.09 1.7-.7 1.94-1.38.24-.68.24-1.26.17-1.38-.08-.12-.28-.2-.57-.35z"/>
                 </svg>
-                <div>
-                  <a href="tel:+233249545987" className="text-white hover:text-yellow-300 transition-colors">0504314485</a>
-                  {/* <a href="tel:+233545446245" className="text-white hover:text-yellow-300 transition-colors">0545446245</a> */}
-                  <div className="text-sm text-gray-400"></div>
+                <div className="space-y-1">
+                  <a href="https://wa.me/233504314485" target="_blank" rel="noopener noreferrer" className="text-white hover:text-yellow-300 transition-colors block">0504314485</a>
+                  <div className="flex items-center text-sm text-gray-300">
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <a href="tel:+233256111633" className="text-white hover:text-yellow-300 transition-colors">0256111633</a>
+                  </div>
                 </div>
               </li>
               <li className="flex items-start">
