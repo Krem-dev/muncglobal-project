@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
 import { motion } from 'framer-motion';
-import { REGISTRATION_FEE } from '../../config/constants';
+import { getRegistrationFeeByLevel } from '../../config/constants';
 
 // Use environment variables
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://muncglobal-project-server.onrender.com/api';
@@ -12,6 +12,7 @@ const PaystackPayment = ({ registrationData, onPaymentSuccess, onPaymentError })
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const toast = useToast();
+  const selectedFee = getRegistrationFeeByLevel(registrationData?.educationalLevel || 'BASIC SCHOOL');
 
   // Validate registrationData
   console.log('PaystackPayment - registrationData:', registrationData);
@@ -102,7 +103,7 @@ const PaystackPayment = ({ registrationData, onPaymentSuccess, onPaymentError })
       const handler = window.PaystackPop.setup({
         key: PAYSTACK_PUBLIC_KEY,
         email: registrationData.email,
-        amount: REGISTRATION_FEE * 100, // Convert GHS to pesewas
+        amount: selectedFee * 100, // Convert GHS to pesewas
         currency: 'GHS',
         ref: paymentReference,
         metadata: {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
 import { motion } from 'framer-motion';
-import { REGISTRATION_FEE } from '../../config/constants';
+import { getRegistrationFeeByLevel } from '../../config/constants';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://muncglobal-project-server.onrender.com/api';
 
@@ -23,6 +23,7 @@ const MomoPayment = ({ registrationData, onPaymentSubmitted, onPaymentError }) =
 
   const MOMO_ACCOUNT_NUMBER = import.meta.env.VITE_MOMO_ACCOUNT_NUMBER || '055 298 1800';
   const MOMO_ACCOUNT_NAME = import.meta.env.VITE_MOMO_ACCOUNT_NAME || ' MUNC-GLOBAL LBG';
+  const selectedFee = getRegistrationFeeByLevel(registrationData?.educationalLevel || 'BASIC SCHOOL');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,7 +67,7 @@ const MomoPayment = ({ registrationData, onPaymentSubmitted, onPaymentError }) =
       <div className="mb-8 text-center">
         <h3 className="text-2xl font-bold text-teal-600 mb-2">Mobile Money Payment</h3>
         <p className="text-gray-600">
-          Send {formatAmount(REGISTRATION_FEE)} to the account below
+          Send {formatAmount(selectedFee)} to the account below
         </p>
       </div>
 
@@ -76,7 +77,7 @@ const MomoPayment = ({ registrationData, onPaymentSubmitted, onPaymentError }) =
           <div className="bg-white rounded-lg p-4">
             <p className="text-3xl font-bold text-teal-600 tracking-wider">{MOMO_ACCOUNT_NUMBER}</p>
             <p className="text-sm text-gray-600 mt-2">{MOMO_ACCOUNT_NAME}</p>
-            <p className="text-lg font-semibold text-gray-800 mt-3">Amount: {formatAmount(REGISTRATION_FEE)}</p>
+            <p className="text-lg font-semibold text-gray-800 mt-3">Amount: {formatAmount(selectedFee)}</p>
           </div>
         </div>
       </div>

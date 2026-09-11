@@ -13,7 +13,10 @@ const router = express.Router();
 // Paystack configuration
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';
-const REGISTRATION_FEE = process.env.REGISTRATION_FEE || 970; // Default to 970 GHS
+const REGISTRATION_FEE = (() => {
+  const fee = Number(process.env.REGISTRATION_FEE ?? 970);
+  return Number.isFinite(fee) && fee > 0 ? fee : 970;
+})();
 
 // Log Paystack configuration for debugging
 console.log('Paystack Secret Key available:', !!PAYSTACK_SECRET_KEY);

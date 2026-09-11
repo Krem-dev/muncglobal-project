@@ -1,6 +1,7 @@
 import express from 'express';
 import { runQuery, getQuery, getAllQuery, Registration, Payment } from '../config/databaseMySQL.js';
 import { sendRegistrationEmail, sendPaymentConfirmationEmail } from '../utils/helpers.js';
+import { getRegistrationFeeAmount } from '../utils/registrationFee.js';
 
 const router = express.Router();
 
@@ -69,14 +70,14 @@ router.post('/', async (req, res) => {
       date_of_birth: dateOfBirth,
       gender: gender,
       phone_number: phoneNumber,
-      postal_address: postalAddress,
+      postal_address: postalAddress || null,
       email: email,
       institution: institution,
-      program_of_study: programOfStudy,
+      program_of_study: programOfStudy || null,
       educational_level: educationalLevel,
       nationality: nationality,
       city: city,
-      committee_preference: committeePreference,
+      committee_preference: committeePreference || 'To be assigned',
       emergency_contact_name: emergencyContact,
       emergency_contact_number: emergencyPhone,
       emergency_contact_relationship: emergencyRelationship,
@@ -221,12 +222,15 @@ router.get('/', async (req, res) => {
     // Convert to plain objects
     const registrationsData = registrations.map(reg => reg.get({ plain: true }));
     
-    // Calculate financial totals
-    const registrationFee = parseFloat(process.env.REGISTRATION_FEE) || 970;
-    const totalExpected = registrationsData.length * registrationFee;
+    // Calculate financial totals using the configured fee by level, with a safe default fallback
+    const registrationFee = getRegistrationFeeAmount('BASIC SCHOOL');
+    const totalExpected = registrationsData.reduce((sum, reg) => {
+      const levelFee = getRegistrationFeeAmount(reg.educational_level || 'BASIC SCHOOL');
+      return sum + levelFee;
+    }, 0);
     const totalPaid = registrationsData
       .filter(reg => reg.payment_status === 'paid')
-      .reduce((sum, reg) => sum + (reg.Payment?.amount || registrationFee), 0);
+      .reduce((sum, reg) => sum + (Number(reg.Payment?.amount) || getRegistrationFeeAmount(reg.educational_level || 'BASIC SCHOOL')), 0);
     const totalPending = totalExpected - totalPaid;
     
     res.status(200).json({

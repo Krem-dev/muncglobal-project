@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import PaystackPayment from '../Payment/PaystackPayment';
 import MomoPayment from './MomoPayment';
 import PaymentMethodSelector from './PaymentMethodSelector';
-import { REGISTRATION_FEE } from '../../config/constants';
+import { getRegistrationFeeByLevel } from '../../config/constants';
 
 const formatAmount = (amount, currency = 'GHS') => {
   const formatter = new Intl.NumberFormat('en-GH', {
@@ -20,6 +20,7 @@ const PaymentStep = ({ formData, onPaymentComplete }) => {
   const [error, setError] = useState('');
   const [selectedMethod, setSelectedMethod] = useState(null);
   const toast = useToast();
+  const totalFee = getRegistrationFeeByLevel(formData?.educationalLevel || 'BASIC SCHOOL');
 
   const handleMethodSelected = (method, data) => {
     setSelectedMethod(method);
@@ -102,7 +103,7 @@ const PaymentStep = ({ formData, onPaymentComplete }) => {
         <div className="border-t border-gray-200 pt-4 mb-4">
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-700">Registration Fee</span>
-            <span className="font-semibold">{formatAmount(REGISTRATION_FEE)}</span>
+            <span className="font-semibold">{formatAmount(totalFee)}</span>
           </div>
           <div className="flex justify-between items-center mb-2 text-sm text-gray-500">
             <span>Transaction Fee</span>
@@ -110,7 +111,7 @@ const PaymentStep = ({ formData, onPaymentComplete }) => {
           </div>
           <div className="flex justify-between items-center font-bold text-lg mt-4 pt-2 border-t border-gray-200">
             <span>Total</span>
-            <span>{formatAmount(REGISTRATION_FEE)}</span>
+            <span>{formatAmount(totalFee)}</span>
           </div>
         </div>
         

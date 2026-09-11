@@ -73,8 +73,8 @@ router.post('/', async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         registrationCode, firstName, middleName || null, surname, dateOfBirth, 
-        gender, phoneNumber, postalAddress, email, institution, 
-        programOfStudy, educationalLevel, nationality, city, committeePreference,
+        gender, phoneNumber, postalAddress || null, email, institution, 
+        programOfStudy || null, educationalLevel, nationality, city, committeePreference,
         emergencyContact, emergencyPhone, emergencyRelationship, 
         specialNeeds, specialNeedsDetails || null, previousExperience, 
         howHeard, howHeard === 'Other' ? howHeardOther : null,

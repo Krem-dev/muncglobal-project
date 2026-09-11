@@ -40,7 +40,7 @@ Registration.init({
   },
   postal_address: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   email: {
     type: DataTypes.STRING,
@@ -52,7 +52,7 @@ Registration.init({
   },
   program_of_study: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   educational_level: {
     type: DataTypes.STRING,
@@ -68,7 +68,8 @@ Registration.init({
   },
   committee_preference: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true,
+    defaultValue: 'To be assigned'
   },
   emergency_contact_name: {
     type: DataTypes.STRING,

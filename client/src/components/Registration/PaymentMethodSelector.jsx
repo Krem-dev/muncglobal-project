@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { REGISTRATION_FEE } from '../../config/constants';
+import { getRegistrationFeeByLevel } from '../../config/constants';
 
 const formatAmount = (amount, currency = 'GHS') => {
   const formatter = new Intl.NumberFormat('en-GH', {
@@ -13,6 +13,7 @@ const formatAmount = (amount, currency = 'GHS') => {
 
 const PaymentMethodSelector = ({ formData, onMethodSelected }) => {
   const [selectedMethod, setSelectedMethod] = useState(null);
+  const selectedFee = getRegistrationFeeByLevel(formData?.educationalLevel || 'BASIC SCHOOL');
 
   const handleMethodSelect = (method) => {
     setSelectedMethod(method);
@@ -28,7 +29,7 @@ const PaymentMethodSelector = ({ formData, onMethodSelected }) => {
       <div className="mb-8 text-center">
         <h3 className="text-2xl font-bold text-teal-600 mb-2">Choose Payment Method</h3>
         <p className="text-gray-600">
-          Select how you would like to pay your registration fee of {formatAmount(REGISTRATION_FEE)}
+          Select how you would like to pay your registration fee of {formatAmount(selectedFee)}
         </p>
       </div>
 

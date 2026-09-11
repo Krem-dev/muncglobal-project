@@ -7,14 +7,38 @@ const envRegistrationFee = Number(import.meta.env.VITE_REGISTRATION_FEE ?? 970);
 // API base URL - uses environment variable if available, otherwise defaults to localhost
 export const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://muncglobal-project-server.onrender.com/api').trim();
 
-export const REGISTRATION_FEE = Number.isFinite(envRegistrationFee) && envRegistrationFee > 0 ? envRegistrationFee : 970;
-
 export const REGISTRATION_FEE_BY_LEVEL = {
-  BASIC_SCHOOL: 970,
-  SECONDARY: 980,
-  TERTIARY: 1000,
-  DEFAULT: 970
+  BASIC_SCHOOL: Number(import.meta.env.VITE_BASIC_SCHOOL_REGISTRATION_FEE ?? 970),
+  SECONDARY: Number(import.meta.env.VITE_SECONDARY_REGISTRATION_FEE ?? 980),
+  TERTIARY: Number(import.meta.env.VITE_TERTIARY_REGISTRATION_FEE ?? 1000),
+  DEFAULT: Number.isFinite(envRegistrationFee) && envRegistrationFee > 0 ? envRegistrationFee : 970
 };
+
+export const getRegistrationFeeByLevel = (level) => {
+  const normalizedLevel = String(level || '').trim().toUpperCase().replace(/[_\s]+/g, '_');
+
+  if (normalizedLevel === 'BASIC_SCHOOL' || normalizedLevel === 'BASIC' || normalizedLevel === 'BASIC SCHOOL') {
+    return Number.isFinite(REGISTRATION_FEE_BY_LEVEL.BASIC_SCHOOL) && REGISTRATION_FEE_BY_LEVEL.BASIC_SCHOOL > 0
+      ? REGISTRATION_FEE_BY_LEVEL.BASIC_SCHOOL
+      : REGISTRATION_FEE_BY_LEVEL.DEFAULT;
+  }
+
+  if (normalizedLevel === 'SECONDARY') {
+    return Number.isFinite(REGISTRATION_FEE_BY_LEVEL.SECONDARY) && REGISTRATION_FEE_BY_LEVEL.SECONDARY > 0
+      ? REGISTRATION_FEE_BY_LEVEL.SECONDARY
+      : REGISTRATION_FEE_BY_LEVEL.DEFAULT;
+  }
+
+  if (normalizedLevel === 'TERTIARY') {
+    return Number.isFinite(REGISTRATION_FEE_BY_LEVEL.TERTIARY) && REGISTRATION_FEE_BY_LEVEL.TERTIARY > 0
+      ? REGISTRATION_FEE_BY_LEVEL.TERTIARY
+      : REGISTRATION_FEE_BY_LEVEL.DEFAULT;
+  }
+
+  return REGISTRATION_FEE_BY_LEVEL.DEFAULT;
+};
+
+export const REGISTRATION_FEE = getRegistrationFeeByLevel('BASIC SCHOOL');
 
 // Date constants
 export const REGISTRATION_DEADLINE = 'December 26, 2026';

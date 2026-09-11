@@ -150,7 +150,10 @@ export const uniqueCodePool = generateUniqueCodePool();
 
 export const sendPaymentConfirmationEmail = async (registration) => {
   // Get the registration fee from environment variable
-  const registrationFee = process.env.REGISTRATION_FEE || 970; // Default to 970 GHS
+  const registrationFee = (() => {
+    const fee = Number(process.env.REGISTRATION_FEE ?? 970);
+    return Number.isFinite(fee) && fee > 0 ? fee : 970;
+  })();
   try {
     console.log('Payment confirmation email - Registration data:', JSON.stringify(registration));
     

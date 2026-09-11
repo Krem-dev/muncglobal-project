@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 import { sendPaymentConfirmationEmail } from '../utils/helpers.js';
 import { sendEmail } from '../utils/emailService.js';
+import { getRegistrationFeeAmount } from '../utils/registrationFee.js';
 
 // Initialize environment variables
 dotenv.config();
@@ -14,7 +15,7 @@ const router = express.Router();
 // Paystack configuration
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';
-const REGISTRATION_FEE = process.env.REGISTRATION_FEE || 970; // Default to 970 GHS
+const REGISTRATION_FEE = getRegistrationFeeAmount('BASIC SCHOOL');
 
 // Log Paystack configuration for debugging
 console.log('Paystack Secret Key available:', !!PAYSTACK_SECRET_KEY);
@@ -27,8 +28,8 @@ console.log('Registration Fee:', REGISTRATION_FEE);
  */
 router.post('/initialize', async (req, res) => {
   try {
-    const { email, firstName, surname, registrationCode } = req.body;
-    const amount = REGISTRATION_FEE; // Use fixed registration fee
+    const { email, firstName, surname, registrationCode, educationalLevel } = req.body;
+    const amount = getRegistrationFeeAmount(educationalLevel || 'BASIC SCHOOL');
     
     // Validate required fields
     if (!email || !firstName || !surname || !registrationCode) {
