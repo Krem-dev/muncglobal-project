@@ -315,7 +315,7 @@ const HomePage = () => {
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">MUNC-GH 2027</h2>
               <h3 className="text-xl md:text-2xl font-semibold mb-4 text-yellow-300">
-                "Empower Your Tomorrow"
+                "Advancing Global Progress Through Innovation, Cooperation, and Action"
               </h3>
               
               {/* Countdown Timer */}
