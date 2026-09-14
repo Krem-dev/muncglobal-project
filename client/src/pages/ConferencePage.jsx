@@ -70,7 +70,7 @@ const ConferencePage = () => {
             >
               <p className="text-sm uppercase tracking-widest text-yellow-200 mb-4">Past Conference Archive</p>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">MUNC-GH 2026 Conference</h1>
-              <p className="text-xl md:text-2xl font-light mb-6">"Advancing Global Progress Through Innovation, Cooperation, and Action"</p>
+              <p className="text-xl md:text-2xl font-light mb-6">"Empowering your tomorrow"</p>
               <p className="max-w-3xl text-gray-200 mb-8">
                 Explore the 2026 conference experience with gallery moments, committee topics, background guides, awardees, dais members, and delegate stories.
               </p>
