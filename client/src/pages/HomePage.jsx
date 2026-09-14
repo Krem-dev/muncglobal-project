@@ -53,7 +53,7 @@ const HomePage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
-                "Empowering your tomorrow"
+                Empower Your Tomorrow
               </motion.h2>
               <motion.p 
                 className="text-lg md:text-xl mb-8 max-w-2xl"
@@ -315,7 +315,7 @@ const HomePage = () => {
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">MUNC-GH 2027</h2>
               <h3 className="text-xl md:text-2xl font-semibold mb-4 text-yellow-300">
-                "Empowering your tomorrow"
+                "Empower Your Tomorrow"
               </h3>
               
               {/* Countdown Timer */}
