@@ -191,32 +191,6 @@ const AdminPage = () => {
     }
   };
 
-  const exportJSON = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/registration/export/json`, {
-        headers: {
-          'x-api-key': (apiKey || '').replace(/\s/g, '')
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Export failed');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `munc-registrations-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      setError('Failed to export JSON');
-      console.error('Export error:', err);
-    }
-  };
 
   // Format date
   const formatDate = (dateString) => {
@@ -417,16 +391,6 @@ const AdminPage = () => {
               Excel
             </button>
             
-            <button
-              onClick={exportJSON}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              JSON
-            </button>
-
             <button
               onClick={() => fetchRegistrations(apiKey)}
               className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium transition"

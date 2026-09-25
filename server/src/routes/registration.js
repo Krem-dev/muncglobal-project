@@ -429,16 +429,15 @@ router.post('/complete', async (req, res) => {
 });
 
 /**
- * @route   GET /api/registration/export/csv
- * @desc    Export all registrations as CSV
+ * @route   GET /api/registration/export/excel
+ * @desc    Export all registrations as Excel (.xlsx)
  * @access  Private (Admin only)
  */
-router.get('/export/csv', async (req, res) => {
+router.get('/export/excel', async (req, res) => {
   try {
-    // API key authentication
     const apiKey = req.headers['x-api-key'];
     const expectedApiKey = process.env.ADMIN_API_KEY || 'muncglobal';
-    
+
     if (!apiKey || apiKey.replace(/\s/g, '') !== expectedApiKey) {
       return res.status(401).json({
         status: 'error',
@@ -446,9 +445,10 @@ router.get('/export/csv', async (req, res) => {
       });
     }
 
-    // Get all registrations
+    const XLSX = await import('xlsx');
+
     const registrations = await getAllQuery(
-      `SELECT 
+      `SELECT
         registration_code,
         first_name,
         middle_name,
@@ -475,92 +475,49 @@ router.get('/export/csv', async (req, res) => {
         payment_status,
         payment_reference,
         created_at
-      FROM registrations 
+      FROM registrations
       ORDER BY created_at DESC`
     );
 
-    // Convert to CSV format
-    const csvHeaders = [
-      'Registration Code',
-      'First Name',
-      'Middle Name',
-      'Surname',
-      'Date of Birth',
-      'Gender',
-      'Phone Number',
-      'Postal Address',
-      'Email',
-      'Institution',
-      'Program of Study',
-      'Educational Level',
-      'Nationality',
-      'City',
-      'Committee Preference',
-      'Emergency Contact Name',
-      'Emergency Contact Number',
-      'Emergency Contact Relationship',
-      'Special Needs',
-      'Special Needs Details',
-      'Previous MUN Experience',
-      'How Heard',
-      'How Heard Other',
-      'Payment Status',
-      'Payment Reference',
-      'Registration Date'
-    ];
+    const rows = registrations.map(reg => ({
+      'Registration Code': reg.registration_code || '',
+      'First Name': reg.first_name || '',
+      'Middle Name': reg.middle_name || '',
+      'Surname': reg.surname || '',
+      'Date of Birth': reg.date_of_birth || '',
+      'Gender': reg.gender || '',
+      'Phone Number': reg.phone_number || '',
+      'Postal Address': reg.postal_address || '',
+      'Email': reg.email || '',
+      'Institution': reg.institution || '',
+      'Program of Study': reg.program_of_study || '',
+      'Educational Level': reg.educational_level || '',
+      'Nationality': reg.nationality || '',
+      'City': reg.city || '',
+      'Committee Preference': reg.committee_preference || '',
+      'Emergency Contact Name': reg.emergency_contact_name || '',
+      'Emergency Contact Number': reg.emergency_contact_number || '',
+      'Emergency Contact Relationship': reg.emergency_contact_relationship || '',
+      'Special Needs': reg.special_needs || '',
+      'Special Needs Details': reg.special_needs_details || '',
+      'Previous MUN Experience': reg.previous_mun_experience || '',
+      'How Heard': reg.how_heard || '',
+      'How Heard Other': reg.how_heard_other || '',
+      'Payment Status': reg.payment_status || '',
+      'Payment Reference': reg.payment_reference || '',
+      'Registration Date': reg.created_at || ''
+    }));
 
-    const csvRows = registrations.map(reg => [
-      reg.registration_code || '',
-      reg.first_name || '',
-      reg.middle_name || '',
-      reg.surname || '',
-      reg.date_of_birth || '',
-      reg.gender || '',
-      reg.phone_number || '',
-      reg.postal_address || '',
-      reg.email || '',
-      reg.institution || '',
-      reg.program_of_study || '',
-      reg.educational_level || '',
-      reg.nationality || '',
-      reg.city || '',
-      reg.committee_preference || '',
-      reg.emergency_contact_name || '',
-      reg.emergency_contact_number || '',
-      reg.emergency_contact_relationship || '',
-      reg.special_needs || '',
-      reg.special_needs_details || '',
-      reg.previous_mun_experience || '',
-      reg.how_heard || '',
-      reg.how_heard_other || '',
-      reg.payment_status || '',
-      reg.payment_reference || '',
-      reg.created_at || ''
-    ]);
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, 'Registrations');
 
-    // Create CSV content with BOM for Excel compatibility
-    const csvContent = [
-      csvHeaders.join(','),
-      ...csvRows.map(row => row.map(field => {
-        // Clean and escape field data
-        let cleanField = String(field || '').replace(/[\r\n]+/g, ' ').trim();
-        // Escape quotes by doubling them
-        cleanField = cleanField.replace(/"/g, '""');
-        // Wrap in quotes
-        return `"${cleanField}"`;
-      }).join(','))
-    ].join('\r\n');
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
-    // Add BOM for Excel UTF-8 compatibility
-    const csvWithBOM = '\uFEFF' + csvContent;
-
-    // Set headers for file download
     const timestamp = new Date().toISOString().split('T')[0];
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="MUNC-Registrations-${timestamp}.csv"`);
-    res.setHeader('Content-Length', Buffer.byteLength(csvWithBOM, 'utf8'));
-    
-    res.status(200).send(csvWithBOM);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="MUNC-Registrations-${timestamp}.xlsx"`);
+    res.status(200).send(buffer);
   } catch (error) {
     console.error('Export error:', error);
     res.status(500).json({
