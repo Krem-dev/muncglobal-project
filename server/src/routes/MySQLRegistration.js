@@ -759,6 +759,35 @@ router.post('/confirm-momo/:registrationCode', async (req, res) => {
 });
 
 /**
+ * @route   DELETE /api/registration/:id
+ * @desc    Delete a registration and its payments
+ * @access  Private (Admin only)
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const apiKey = req.headers['x-api-key'];
+    const expectedApiKey = process.env.ADMIN_API_KEY || 'muncglobal';
+
+    if (!apiKey || apiKey.replace(/\s/g, '') !== expectedApiKey) {
+      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+    }
+
+    const registration = await Registration.findByPk(req.params.id);
+    if (!registration) {
+      return res.status(404).json({ status: 'error', message: 'Registration not found' });
+    }
+
+    await Payment.destroy({ where: { registration_id: registration.id } });
+    await registration.destroy();
+
+    res.status(200).json({ status: 'success', message: 'Registration deleted' });
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to delete registration' });
+  }
+});
+
+/**
  * @route   GET /api/registration/export/json
  * @desc    Export all registrations as JSON
  * @access  Private (Admin only)

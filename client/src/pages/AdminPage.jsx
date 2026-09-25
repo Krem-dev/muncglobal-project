@@ -9,6 +9,7 @@ const AdminPage = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [confirmingId, setConfirmingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const [selectedYear, setSelectedYear] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [registrationFee, setRegistrationFee] = useState(970);
@@ -72,6 +73,28 @@ const AdminPage = () => {
       setError('Error confirming payment: ' + err.message);
     } finally {
       setConfirmingId(null);
+    }
+  };
+
+  const deleteRegistration = async (id, name) => {
+    if (!window.confirm(`Delete registration for ${name}? This cannot be undone.`)) return;
+    try {
+      setDeletingId(id);
+      const response = await fetch(`${API_BASE_URL}/registration/${id}`, {
+        method: 'DELETE',
+        headers: { 'x-api-key': apiKey.replace(/\s/g, '') }
+      });
+      if (!response.ok) throw new Error('Failed to delete');
+      const data = await response.json();
+      if (data.status === 'success') {
+        setRegistrations(prev => prev.filter(r => r.id !== id));
+      } else {
+        setError(data.message || 'Failed to delete');
+      }
+    } catch (err) {
+      setError('Error deleting registration: ' + err.message);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -384,16 +407,14 @@ const AdminPage = () => {
                     <th className="w-[9%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Status</th>
                     <th className="w-[7%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Amount</th>
                     <th className="w-[12%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Emergency</th>
-                    <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Date</th>
-                    {activeTab === 'momo' && (
-                      <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Action</th>
-                    )}
+                    <th className="w-[7%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Date</th>
+                    <th className="w-[9%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {filteredRegistrations.length === 0 ? (
                     <tr>
-                      <td colSpan={activeTab === 'momo' ? 10 : 9} className="px-2 py-12 text-center text-slate-400">
+                      <td colSpan={10} className="px-2 py-12 text-center text-slate-400">
                         No registrations found{searchQuery ? ` for "${searchQuery}"` : ''}.
                       </td>
                     </tr>
@@ -436,17 +457,26 @@ const AdminPage = () => {
                           )}
                         </td>
                         <td className="px-2 py-2.5 text-slate-500 text-xs">{formatDate(reg.created_at)}</td>
-                        {activeTab === 'momo' && (
-                          <td className="px-2 py-2.5">
+                        <td className="px-2 py-2.5">
+                          <div className="flex items-center gap-1">
+                            {activeTab === 'momo' && (
+                              <button
+                                onClick={() => confirmMomoPayment(reg.registration_code)}
+                                disabled={confirmingId === reg.registration_code}
+                                className="inline-flex items-center px-2 py-1 text-[10px] font-semibold bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                              >
+                                {confirmingId === reg.registration_code ? '...' : 'Confirm'}
+                              </button>
+                            )}
                             <button
-                              onClick={() => confirmMomoPayment(reg.registration_code)}
-                              disabled={confirmingId === reg.registration_code}
-                              className="inline-flex items-center px-2 py-1 text-[10px] font-semibold bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                              onClick={() => deleteRegistration(reg.id, `${reg.first_name} ${reg.surname}`)}
+                              disabled={deletingId === reg.id}
+                              className="inline-flex items-center px-2 py-1 text-[10px] font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
                             >
-                              {confirmingId === reg.registration_code ? '...' : 'Confirm'}
+                              {deletingId === reg.id ? '...' : 'Delete'}
                             </button>
-                          </td>
-                        )}
+                          </div>
+                        </td>
                       </tr>
                     ))
                   )}
