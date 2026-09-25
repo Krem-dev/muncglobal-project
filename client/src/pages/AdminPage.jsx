@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config/constants.js';
 
 const AdminPage = () => {
@@ -10,113 +9,42 @@ const AdminPage = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [confirmingId, setConfirmingId] = useState(null);
-  const [stats, setStats] = useState({
-    total: 0,
-    paid: 0,
-    pending: 0
-  });
+  const [selectedYear, setSelectedYear] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [registrationFee, setRegistrationFee] = useState(970);
 
-  // Check if API key is stored in localStorage
-  useEffect(() => {
-    // Clear any potentially corrupted stored key for now
-    localStorage.removeItem('munc_admin_api_key');
-    
-    const storedApiKey = localStorage.getItem('munc_admin_api_key');
-    if (storedApiKey && storedApiKey.replace(/\s/g, '') === 'muncglobal_admin_key_change_me') {
-      setApiKey(storedApiKey.replace(/\s/g, ''));
-      // Don't set authenticated until we validate the key
-      validateStoredApiKey(storedApiKey.replace(/\s/g, ''));
-    }
-  }, []);
-  
-  // Validate stored API key
-  const validateStoredApiKey = async (key) => {
-    try {
-      await fetchRegistrations(key);
-      setIsAuthenticated(true);
-    } catch (err) {
-      // Invalid stored key, remove it and stay on login screen
-      localStorage.removeItem('munc_admin_api_key');
-      setApiKey('');
-      setIsAuthenticated(false);
-    }
-  };
-
-  // Fetch registrations from API
   const fetchRegistrations = async (key) => {
     setLoading(true);
     setError('');
-    
-    console.log('Sending API key:', JSON.stringify(key));
-    console.log('API key length:', key.length);
-    console.log('API key trimmed:', JSON.stringify(key.trim()));
-    console.log('API key no spaces:', JSON.stringify(key.replace(/\s/g, '')));
-    console.log('Sending to server:', JSON.stringify(key.replace(/\s/g, '')));
-    
     try {
       const response = await fetch(`${API_BASE_URL}/registration`, {
-        headers: {
-          'x-api-key': key.replace(/\s/g, '') // Remove all spaces
-        }
+        headers: { 'x-api-key': key.replace(/\s/g, '') }
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch registrations');
-      }
-
+      if (!response.ok) throw new Error('Failed to fetch registrations');
       const data = await response.json();
       setRegistrations(data.data || []);
-      
-      // Update stats with financial data if available
-      if (data.financials) {
-        setStats({
-          total: data.financials.totalRegistrations,
-          paid: data.financials.paidCount,
-          pending: data.financials.pendingCount,
-          totalExpected: data.financials.totalExpected,
-          totalPaid: data.financials.totalPaid,
-          totalPending: data.financials.totalPending,
-          registrationFee: data.financials.registrationFee
-        });
-      } else {
-        // Fallback calculation
-        const total = data.data?.length || 0;
-        const paid = data.data?.filter(reg => reg.payment_status === 'paid').length || 0;
-        const pending = data.data?.filter(reg => reg.payment_status === 'pending').length || 0;
-        
-        setStats({ total, paid, pending });
+      if (data.financials?.registrationFee) {
+        setRegistrationFee(data.financials.registrationFee);
       }
     } catch (err) {
       setError('Failed to fetch registrations. Please check your API key.');
-      console.error('Fetch error:', err);
-      // Propagate error so handleAuth can prevent dashboard access on invalid key
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle authentication
   const handleAuth = async (e) => {
     e.preventDefault();
-    if (!apiKey.trim()) {
-      setError('Please enter an API key');
-      return;
-    }
-
+    if (!apiKey.trim()) { setError('Please enter an API key'); return; }
     setLoading(true);
     setError('');
-    setIsAuthenticated(false); // Ensure we're not authenticated during the process
-    
     try {
-      const cleanApiKey = apiKey.replace(/\s/g, '');
-      await fetchRegistrations(cleanApiKey);
-      // Only set authenticated if the API call was successful
-      localStorage.setItem('munc_admin_api_key', cleanApiKey);
+      const cleanKey = apiKey.replace(/\s/g, '');
+      await fetchRegistrations(cleanKey);
+      localStorage.setItem('munc_admin_api_key', cleanKey);
       setIsAuthenticated(true);
-      setError('');
-    } catch (err) {
-      // Ensure we stay unauthenticated on failure
+    } catch {
       setIsAuthenticated(false);
       localStorage.removeItem('munc_admin_api_key');
       setError('Invalid API key or authentication failed');
@@ -130,16 +58,9 @@ const AdminPage = () => {
       setConfirmingId(registrationCode);
       const response = await fetch(`${API_BASE_URL}/registration/confirm-momo/${registrationCode}`, {
         method: 'POST',
-        headers: {
-          'x-api-key': (apiKey || '').replace(/\s/g, ''),
-          'Content-Type': 'application/json'
-        }
+        headers: { 'x-api-key': apiKey.replace(/\s/g, ''), 'Content-Type': 'application/json' }
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to confirm payment');
-      }
-
+      if (!response.ok) throw new Error('Failed to confirm payment');
       const data = await response.json();
       if (data.status === 'success') {
         setError('');
@@ -149,7 +70,6 @@ const AdminPage = () => {
       }
     } catch (err) {
       setError('Error confirming payment: ' + err.message);
-      console.error('Confirm error:', err);
     } finally {
       setConfirmingId(null);
     }
@@ -160,22 +80,14 @@ const AdminPage = () => {
     setIsAuthenticated(false);
     setApiKey('');
     setRegistrations([]);
-    setStats({ total: 0, paid: 0, pending: 0 });
   };
 
-  // Export functions
   const exportExcel = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/registration/export/excel`, {
-        headers: {
-          'x-api-key': (apiKey || '').replace(/\s/g, '')
-        }
+        headers: { 'x-api-key': apiKey.replace(/\s/g, '') }
       });
-
-      if (!response.ok) {
-        throw new Error('Export failed');
-      }
-
+      if (!response.ok) throw new Error('Export failed');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -185,404 +97,372 @@ const AdminPage = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err) {
+    } catch {
       setError('Failed to export Excel file');
-      console.error('Export error:', err);
     }
   };
 
+  const availableYears = useMemo(() => {
+    const years = [...new Set(registrations.map(r => new Date(r.created_at).getFullYear()))];
+    return years.sort((a, b) => b - a);
+  }, [registrations]);
 
-  // Format date
+  const yearFiltered = useMemo(() => {
+    if (selectedYear === 'all') return registrations;
+    return registrations.filter(r => new Date(r.created_at).getFullYear() === Number(selectedYear));
+  }, [registrations, selectedYear]);
+
+  const tabCounts = useMemo(() => {
+    const all = yearFiltered;
+    return {
+      all: all.length,
+      paid: all.filter(r => r.payment_status === 'paid').length,
+      pending: all.filter(r => r.payment_status === 'pending').length,
+      momoVerify: all.filter(r => r.payment_status === 'pending_verification').length,
+    };
+  }, [yearFiltered]);
+
+  const stats = useMemo(() => {
+    const data = yearFiltered;
+    const total = data.length;
+    const paid = data.filter(r => r.payment_status === 'paid').length;
+    const pending = data.filter(r => r.payment_status === 'pending').length;
+    const momoVerify = data.filter(r => r.payment_status === 'pending_verification').length;
+    const totalExpected = total * registrationFee;
+    const totalCollected = data
+      .filter(r => r.payment_status === 'paid')
+      .reduce((sum, r) => sum + (Number(r.Payments?.[0]?.amount) || registrationFee), 0);
+    return { total, paid, pending, momoVerify, totalExpected, totalCollected, outstanding: totalExpected - totalCollected };
+  }, [yearFiltered, registrationFee]);
+
+  const filteredRegistrations = useMemo(() => {
+    let data = yearFiltered;
+    if (activeTab === 'paid') data = data.filter(r => r.payment_status === 'paid');
+    else if (activeTab === 'pending') data = data.filter(r => r.payment_status === 'pending');
+    else if (activeTab === 'momo') data = data.filter(r => r.payment_status === 'pending_verification');
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      data = data.filter(r =>
+        r.first_name?.toLowerCase().includes(q) ||
+        r.surname?.toLowerCase().includes(q) ||
+        r.email?.toLowerCase().includes(q) ||
+        r.phone_number?.includes(q) ||
+        r.registration_code?.toLowerCase().includes(q) ||
+        r.institution?.toLowerCase().includes(q)
+      );
+    }
+    return data;
+  }, [yearFiltered, activeTab, searchQuery]);
+
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric'
     });
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+  };
+
+  // ─── Login Screen ────────────────────────────
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center py-12 px-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full"
-        >
-          <div className="bg-white rounded-2xl shadow-2xl p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-teal-50 to-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Admin Access</h2>
-              <p className="text-gray-600">Enter your API key to continue</p>
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4">
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-500/10 mb-4">
+              <svg className="w-7 h-7 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-semibold text-white">Admin Dashboard</h1>
+            <p className="text-slate-400 text-sm mt-1">MUNC-GLOBAL Registration System</p>
+          </div>
+
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div>
+              <input
+                type="password"
+                required
+                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition text-sm"
+                placeholder="Enter API key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
             </div>
 
-            <form className="space-y-6" onSubmit={handleAuth}>
-              <div>
-                <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 mb-2">
-                  API Key
-                </label>
-                <input
-                  id="api-key"
-                  type="password"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
-                  placeholder="Enter your API key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                />
-              </div>
+            {error && (
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            )}
 
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400 text-white font-medium py-3 rounded-lg transition flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Authenticating...
-                  </>
-                ) : (
-                  'Access Dashboard'
-                )}
-              </button>
-            </form>
-          </div>
-        </motion.div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-teal-600 hover:bg-teal-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium py-3 rounded-xl transition text-sm"
+            >
+              {loading ? 'Authenticating...' : 'Sign In'}
+            </button>
+          </form>
+        </div>
       </div>
     );
   }
 
+  // ─── Dashboard ────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-1">Manage registrations and payments</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition"
-            >
-              Logout
-            </button>
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
+        <div className="mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold text-slate-900">MUNC-GLOBAL</h1>
+            <span className="text-slate-300">|</span>
+            <span className="text-sm text-slate-500">Admin Dashboard</span>
           </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Total</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.total}</p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Paid</p>
-                <p className="text-3xl font-bold text-green-600 mt-1">{stats.paid}</p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Pending</p>
-                <p className="text-3xl font-bold text-yellow-600 mt-1">{stats.pending}</p>
-              </div>
-              <div className="bg-yellow-100 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </motion.div>
-          
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Expected</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">GH₵{stats.totalExpected || 0}</p>
-              </div>
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                </svg>
-              </div>
-            </div>
-          </motion.div>
-          
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Collected</p>
-                <p className="text-2xl font-bold text-emerald-600 mt-1">GH₵{stats.totalPaid || 0}</p>
-              </div>
-              <div className="bg-emerald-100 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                </svg>
-              </div>
-            </div>
-          </motion.div>
-          
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Outstanding</p>
-                <p className="text-2xl font-bold text-orange-600 mt-1">GH₵{stats.totalPending || 0}</p>
-              </div>
-              <div className="bg-orange-100 p-3 rounded-lg">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Export Section */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Export Data</h2>
-          <p className="text-gray-600 text-sm mb-6">Download registration data in your preferred format</p>
-          
-          <div className="flex flex-wrap gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={exportExcel}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-medium transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Excel
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              Export
             </button>
-            
             <button
               onClick={() => fetchRegistrations(apiKey)}
-              className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2.5 rounded-lg font-medium transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
               Refresh
             </button>
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
+            >
+              Sign Out
+            </button>
           </div>
-        </motion.div>
+        </div>
+      </header>
 
-        {/* Error Display */}
-        {error && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </motion.div>
-        )}
+      <main className="mx-auto px-4 sm:px-8 py-6 space-y-6">
+        {/* Year Filter */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSelectedYear('all')}
+            className={`px-3 py-1.5 text-sm font-medium rounded-lg transition ${
+              selectedYear === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            All Years
+          </button>
+          {availableYears.map(year => (
+            <button
+              key={year}
+              onClick={() => setSelectedYear(String(year))}
+              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition ${
+                selectedYear === String(year) ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
 
-        {/* Registrations Table */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Registrations</h2>
-            
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setActiveTab('all')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  activeTab === 'all'
-                    ? 'bg-teal-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                All ({registrations.length})
-              </button>
-              <button
-                onClick={() => setActiveTab('momo')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  activeTab === 'momo'
-                    ? 'bg-teal-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                🔔 MoMo Pending ({registrations.filter(r => r.payment_status === 'pending_verification').length})
-              </button>
-              <button
-                onClick={() => setActiveTab('paystack')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  activeTab === 'paystack'
-                    ? 'bg-teal-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                💳 Paystack ({registrations.filter(r => r.payment_status === 'paid' && (r.payment_method === 'paystack' || !r.payment_method)).length})
-              </button>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Registrations</p>
+            <p className="text-3xl font-bold text-slate-900 mt-2">{stats.total}</p>
+            <div className="flex gap-3 mt-3 text-xs text-slate-500">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500"></span>{stats.paid} paid</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500"></span>{stats.pending} pending</span>
+              {stats.momoVerify > 0 && (
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500"></span>{stats.momoVerify} verifying</span>
+              )}
             </div>
           </div>
-          
+
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Expected Revenue</p>
+            <p className="text-3xl font-bold text-slate-900 mt-2">
+              <span className="text-lg font-medium text-slate-400">GH₵</span>{formatCurrency(stats.totalExpected)}
+            </p>
+            <p className="text-xs text-slate-400 mt-3">{stats.total} × GH₵{formatCurrency(registrationFee)}</p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Collected</p>
+            <p className="text-3xl font-bold text-emerald-600 mt-2">
+              <span className="text-lg font-medium text-emerald-400">GH₵</span>{formatCurrency(stats.totalCollected)}
+            </p>
+            <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                style={{ width: `${stats.totalExpected ? (stats.totalCollected / stats.totalExpected) * 100 : 0}%` }}
+              ></div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Outstanding</p>
+            <p className="text-3xl font-bold text-amber-600 mt-2">
+              <span className="text-lg font-medium text-amber-400">GH₵</span>{formatCurrency(stats.outstanding)}
+            </p>
+            <p className="text-xs text-slate-400 mt-3">{stats.pending + stats.momoVerify} unpaid registrations</p>
+          </div>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl flex items-center justify-between">
+            <span>{error}</span>
+            <button onClick={() => setError('')} className="text-red-400 hover:text-red-600">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
+
+        {/* Table Card */}
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          {/* Table Header */}
+          <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center gap-3">
+            {/* Tabs */}
+            <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+              {[
+                { key: 'all', label: 'All', count: tabCounts.all },
+                { key: 'paid', label: 'Paid', count: tabCounts.paid },
+                { key: 'pending', label: 'Pending', count: tabCounts.pending },
+                { key: 'momo', label: 'MoMo Verify', count: tabCounts.momoVerify },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition whitespace-nowrap ${
+                    activeTab === tab.key
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {tab.label}
+                  <span className={`ml-1.5 ${activeTab === tab.key ? 'text-slate-400' : 'text-slate-400'}`}>{tab.count}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Search */}
+            <div className="relative sm:ml-auto">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search name, email, phone..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-64 pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 transition"
+              />
+            </div>
+          </div>
+
+          {/* Table */}
           {loading ? (
-            <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading registrations...</p>
+            <div className="py-16 text-center">
+              <div className="inline-block w-8 h-8 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin"></div>
+              <p className="mt-3 text-sm text-slate-500">Loading registrations...</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Registration Code
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Phone
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Institution
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Transaction ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Payment Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Emergency Contact
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Emergency Phone
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Relationship
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Registration Date
-                    </th>
+              <table className="w-full text-sm table-fixed">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="w-[3%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">#</th>
+                    <th className="w-[15%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th>
+                    <th className="w-[16%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Email</th>
+                    <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Phone</th>
+                    <th className="w-[14%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Institution</th>
+                    <th className="w-[9%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Status</th>
+                    <th className="w-[7%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Amount</th>
+                    <th className="w-[12%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Emergency</th>
+                    <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Date</th>
                     {activeTab === 'momo' && (
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
-                      </th>
+                      <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Action</th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {(activeTab === 'momo' 
-                    ? registrations.filter(r => r.payment_status === 'pending_verification')
-                    : activeTab === 'paystack'
-                    ? registrations.filter(r => r.payment_status === 'paid' && (r.payment_method === 'paystack' || !r.payment_method))
-                    : registrations
-                  ).slice(0, 50).map((registration, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {registration.registration_code}
+                <tbody className="divide-y divide-slate-50">
+                  {filteredRegistrations.length === 0 ? (
+                    <tr>
+                      <td colSpan={activeTab === 'momo' ? 10 : 9} className="px-2 py-12 text-center text-slate-400">
+                        No registrations found{searchQuery ? ` for "${searchQuery}"` : ''}.
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {`${registration.first_name} ${registration.surname}`}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {registration.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {registration.phone_number}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {registration.institution}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {registration.transaction_id || registration.payment_reference || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {registration.amount ? `GH₵${registration.amount}` : (registration.payment_status === 'paid' ? `GH₵${stats.registrationFee || 1}` : '-')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          registration.payment_status === 'paid' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {registration.payment_status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {registration.emergency_contact_name || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {registration.emergency_contact_number || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {registration.emergency_contact_relationship || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(registration.created_at)}
-                      </td>
-                      {activeTab === 'momo' && (
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <button
-                            onClick={() => confirmMomoPayment(registration.registration_code)}
-                            disabled={confirmingId === registration.registration_code}
-                            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
-                          >
-                            {confirmingId === registration.registration_code ? 'Confirming...' : 'Confirm Payment'}
-                          </button>
-                        </td>
-                      )}
                     </tr>
-                  ))}
+                  ) : (
+                    filteredRegistrations.map((reg, i) => (
+                      <tr key={reg.id || i} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-2 py-2.5 text-slate-400 font-mono text-xs">{i + 1}</td>
+                        <td className="px-2 py-2.5">
+                          <p className="font-medium text-slate-900 text-xs truncate">{reg.first_name} {reg.surname}</p>
+                          <p className="text-[10px] text-slate-400 font-mono truncate">{reg.registration_code}</p>
+                        </td>
+                        <td className="px-2 py-2.5 text-slate-600 text-xs truncate">{reg.email}</td>
+                        <td className="px-2 py-2.5 text-slate-600 text-xs">{reg.phone_number}</td>
+                        <td className="px-2 py-2.5 text-slate-600 text-xs truncate">{reg.institution}</td>
+                        <td className="px-2 py-2.5">
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                            reg.payment_status === 'paid'
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : reg.payment_status === 'pending_verification'
+                              ? 'bg-orange-50 text-orange-700'
+                              : 'bg-amber-50 text-amber-700'
+                          }`}>
+                            {reg.payment_status === 'pending_verification' ? 'Verifying' : reg.payment_status}
+                          </span>
+                        </td>
+                        <td className="px-2 py-2.5 text-slate-600 text-xs font-mono">
+                          {(reg.Payments?.[0]?.amount || reg.payment_status === 'paid')
+                            ? `₵${formatCurrency(reg.Payments?.[0]?.amount || registrationFee)}`
+                            : '—'
+                          }
+                        </td>
+                        <td className="px-2 py-2.5">
+                          {reg.emergency_contact_name ? (
+                            <>
+                              <p className="text-slate-700 text-xs truncate">{reg.emergency_contact_name}</p>
+                              <p className="text-slate-400 text-[10px] truncate">{reg.emergency_contact_number}</p>
+                            </>
+                          ) : (
+                            <span className="text-slate-300 text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="px-2 py-2.5 text-slate-500 text-xs">{formatDate(reg.created_at)}</td>
+                        {activeTab === 'momo' && (
+                          <td className="px-2 py-2.5">
+                            <button
+                              onClick={() => confirmMomoPayment(reg.registration_code)}
+                              disabled={confirmingId === reg.registration_code}
+                              className="inline-flex items-center px-2 py-1 text-[10px] font-semibold bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                            >
+                              {confirmingId === reg.registration_code ? '...' : 'Confirm'}
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
-              
-              {registrations.length > 50 && (
-                <div className="px-6 py-4 bg-gray-50 text-center text-sm text-gray-600">
-                  Showing first 50 registrations. Export data to view all {registrations.length} records.
-                </div>
-              )}
-              
-              {registrations.length === 0 && !loading && (
-                <div className="px-6 py-8 text-center text-gray-500">
-                  No registrations found.
+
+              {filteredRegistrations.length > 0 && (
+                <div className="px-4 py-3 border-t border-slate-100 text-xs text-slate-400">
+                  Showing {filteredRegistrations.length} registration{filteredRegistrations.length !== 1 ? 's' : ''}
+                  {selectedYear !== 'all' ? ` from ${selectedYear}` : ''}
                 </div>
               )}
             </div>
           )}
-        </motion.div>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };
