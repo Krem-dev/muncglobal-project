@@ -8,9 +8,9 @@ export const initializeDatabase = async () => {
     await sequelize.authenticate();
     console.log('Connection to Aiven MySQL has been established successfully.');
     
-    // Sync models and adapt existing schema to match model definitions
-    await sequelize.sync({ alter: true });
-    console.log('Database models synchronized with current schema');
+    // Sync models without altering existing schema (table already exists in production)
+    await sequelize.sync();
+    console.log('Database models synchronized');
     
     return true;
   } catch (error) {

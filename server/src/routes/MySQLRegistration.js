@@ -1,4 +1,5 @@
 import express from 'express';
+import ExcelJS from 'exceljs';
 import { runQuery, getQuery, getAllQuery, Registration, Payment } from '../config/databaseMySQL.js';
 import { sendRegistrationEmail, sendPaymentConfirmationEmail } from '../utils/helpers.js';
 import { getRegistrationFeeAmount } from '../utils/registrationFee.js';
@@ -210,7 +211,9 @@ router.get('/', async (req, res) => {
     const registrations = await Registration.findAll({
       attributes: [
         'id', 'registration_code', 'first_name', 'surname', 'email', 'phone_number',
-        'institution', 'nationality', 'created_at', 'payment_status', 'payment_reference'
+        'institution', 'nationality', 'created_at', 'payment_status', 'payment_reference',
+        'emergency_contact_name', 'emergency_contact_number', 'emergency_contact_relationship',
+        'payment_method'
       ],
       include: [{
         model: Payment,
@@ -424,6 +427,83 @@ router.post('/complete', async (req, res) => {
       message: 'An error occurred while completing registration',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
+  }
+});
+
+/**
+ * @route   GET /api/registration/export/excel
+ * @desc    Export all registrations as Excel (.xlsx)
+ * @access  Private (Admin only)
+ */
+router.get('/export/excel', async (req, res) => {
+  try {
+    const apiKey = req.headers['x-api-key'];
+    const expectedApiKey = process.env.ADMIN_API_KEY || 'muncglobal';
+
+    if (!apiKey || apiKey.replace(/\s/g, '') !== expectedApiKey) {
+      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+    }
+
+    const registrations = await Registration.findAll({
+      include: [{ model: Payment, attributes: ['transaction_id', 'amount', 'payment_method', 'payment_date'] }],
+      order: [['created_at', 'DESC']]
+    });
+    const data = registrations.map(r => r.get({ plain: true }));
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Registrations');
+
+    sheet.columns = [
+      { header: 'Registration Code', key: 'registration_code', width: 22 },
+      { header: 'First Name', key: 'first_name', width: 15 },
+      { header: 'Middle Name', key: 'middle_name', width: 15 },
+      { header: 'Surname', key: 'surname', width: 15 },
+      { header: 'Date of Birth', key: 'date_of_birth', width: 14 },
+      { header: 'Gender', key: 'gender', width: 10 },
+      { header: 'Phone', key: 'phone_number', width: 15 },
+      { header: 'Email', key: 'email', width: 28 },
+      { header: 'Institution', key: 'institution', width: 30 },
+      { header: 'Program of Study', key: 'program_of_study', width: 22 },
+      { header: 'Educational Level', key: 'educational_level', width: 18 },
+      { header: 'Nationality', key: 'nationality', width: 14 },
+      { header: 'City', key: 'city', width: 14 },
+      { header: 'Committee Preference', key: 'committee_preference', width: 22 },
+      { header: 'Payment Status', key: 'payment_status', width: 14 },
+      { header: 'Payment Reference', key: 'payment_reference', width: 20 },
+      { header: 'Transaction ID', key: 'transaction_id', width: 20 },
+      { header: 'Amount', key: 'amount', width: 10 },
+      { header: 'Payment Method', key: 'payment_method', width: 16 },
+      { header: 'Emergency Contact', key: 'emergency_contact_name', width: 18 },
+      { header: 'Emergency Phone', key: 'emergency_contact_number', width: 16 },
+      { header: 'Relationship', key: 'emergency_contact_relationship', width: 14 },
+      { header: 'Special Needs', key: 'special_needs', width: 14 },
+      { header: 'Special Needs Details', key: 'special_needs_details', width: 20 },
+      { header: 'Previous MUN', key: 'previous_mun_experience', width: 14 },
+      { header: 'How Heard', key: 'how_heard', width: 16 },
+      { header: 'Registration Date', key: 'created_at', width: 20 },
+    ];
+
+    sheet.getRow(1).font = { bold: true };
+
+    data.forEach(reg => {
+      const payment = reg.Payments?.[0];
+      sheet.addRow({
+        ...reg,
+        transaction_id: payment?.transaction_id || reg.payment_reference || '',
+        amount: payment?.amount || '',
+        payment_method: payment?.payment_method || reg.payment_method || '',
+      });
+    });
+
+    const timestamp = new Date().toISOString().split('T')[0];
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="MUNC-Registrations-${timestamp}.xlsx"`);
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error('Excel export error:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to export Excel file' });
   }
 });
 
