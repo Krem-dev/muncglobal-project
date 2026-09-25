@@ -216,6 +216,7 @@ router.get('/', async (req, res) => {
       `SELECT 
         r.id, r.registration_code, r.first_name, r.surname, r.email, r.phone_number,
         r.institution, r.nationality, r.created_at, r.payment_status, r.payment_reference,
+        r.emergency_contact_name, r.emergency_contact_number, r.emergency_contact_relationship,
         p.transaction_id, p.amount, p.payment_date, p.payment_method
       FROM registrations r
       LEFT JOIN payments p ON r.id = p.registration_id
