@@ -34,7 +34,7 @@ const ProgramsPage = () => {
       title: 'Leadership Academy',
       status: 'active',
       description: 'Our flagship program that develops essential leadership skills through workshops, mentoring, and practical experiences. Participants learn effective communication, strategic thinking, team management, and ethical leadership principles.',
-      image: '/images/leadership.JPG'
+      image: '/images/Kwadwo-Marfo.jpg'
     },
     {
       id: 'cultural-exchange',

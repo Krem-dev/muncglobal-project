@@ -223,7 +223,7 @@ const HomePage = () => {
             >
               <div className="h-48 bg-gray-200">
                 <img 
-                  src="/images/leadership.JPG" 
+                  src="/images/Kwadwo-Marfo.jpg" 
                   alt="Leadership Academy" 
                   className="w-full h-full object-cover"
                 />
