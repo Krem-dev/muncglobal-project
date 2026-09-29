@@ -39,6 +39,7 @@ const LeadershipPage = () => {
       role: "Programs Director",
       description: "Extensive experience in designing and delivering leadership development and community engagement initiatives.",
       image: '/images/Samuel.jpeg',
+      imagePosition: 'center 8%',
       tags: ['Leadership Development', 'Program Strategy']
     },
     {
@@ -82,7 +83,8 @@ const LeadershipPage = () => {
                     <img
                       src={leader.image}
                       alt={leader.name}
-                      className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                      style={{ objectPosition: leader.imagePosition || 'center top' }}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
                   <div className="h-1/4 p-5 text-left">
