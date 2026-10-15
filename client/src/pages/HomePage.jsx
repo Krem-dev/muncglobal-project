@@ -356,13 +356,41 @@ const HomePage = () => {
               viewport={{ once: true }}
               variants={slideUp}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="rounded-lg overflow-hidden shadow-xl"
+              className="w-full space-y-4"
             >
-              <img 
-                src="/images/event.JPG" 
-                alt="MUNC-GH Conference" 
-                className="w-full h-full object-cover"
+              <img
+                src="/images/event.JPG"
+                alt="MUNC-GLOBAL conference delegates gathered for a session"
+                className="w-full aspect-[16/9] object-cover rounded-lg shadow-xl"
               />
+              <div className="grid grid-cols-2 items-start gap-3 sm:gap-4">
+              <a
+                href="/images/IMG-20261014-WA0001.jpg"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open the MUNC-GLOBAL Conference 2027 flyer with youth ambassadors"
+                className="block overflow-hidden rounded-lg shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-yellow-300"
+              >
+                <img
+                  src="/images/IMG-20261014-WA0001.jpg"
+                  alt="MUNC-GLOBAL Conference 2027 flyer featuring four youth ambassadors"
+                  className="w-full h-auto"
+                />
+              </a>
+              <a
+                href="/images/IMG-20261014-WA0002.jpg"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open the MUNC-GLOBAL Conference 2027 flyer with conference speakers"
+                className="block overflow-hidden rounded-lg shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-yellow-300"
+              >
+                <img
+                  src="/images/IMG-20261014-WA0002.jpg"
+                  alt="MUNC-GLOBAL Conference 2027 flyer featuring conference speakers"
+                  className="w-full h-auto"
+                />
+              </a>
+              </div>
             </motion.div>
           </div>
         </div>
