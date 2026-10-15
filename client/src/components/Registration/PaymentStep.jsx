@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { motion } from 'framer-motion';
-import PaystackPayment from '../Payment/PaystackPayment';
 import MomoPayment from './MomoPayment';
-import PaymentMethodSelector from './PaymentMethodSelector';
 import { getRegistrationFeeByLevel } from '../../config/constants';
 
 const formatAmount = (amount, currency = 'GHS') => {
@@ -16,23 +14,9 @@ const formatAmount = (amount, currency = 'GHS') => {
 };
 
 const PaymentStep = ({ formData, onPaymentComplete }) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState(null);
   const toast = useToast();
   const totalFee = getRegistrationFeeByLevel(formData?.educationalLevel || 'BASIC SCHOOL');
-
-  const handleMethodSelected = (method, data) => {
-    setSelectedMethod(method);
-  };
-
-  const handlePaymentSuccess = (paymentData) => {
-    toast.success('Payment successful!');
-    
-    if (onPaymentComplete) {
-      onPaymentComplete(paymentData);
-    }
-  };
 
   const handlePaymentError = (error) => {
     console.error('Payment error:', error);
@@ -117,7 +101,7 @@ const PaymentStep = ({ formData, onPaymentComplete }) => {
         
         <div className="bg-teal-50 p-4 rounded-md mb-4">
           <p className="text-sm text-teal-700">
-            <span className="font-medium">Important:</span> When you click the "Pay Now" button below, you'll be redirected to our secure payment gateway. After completing your payment, you'll automatically return to the confirmation page.
+            <span className="font-medium">Important:</span> Send your registration fee using Mobile Money, then submit the transaction ID below. Your payment will be verified by our team.
           </p>
         </div>
 
@@ -136,43 +120,11 @@ const PaymentStep = ({ formData, onPaymentComplete }) => {
           </div>
         )}
 
-        {!selectedMethod ? (
-          <PaymentMethodSelector 
-            formData={formData}
-            onMethodSelected={handleMethodSelected}
-          />
-        ) : selectedMethod === 'paystack' ? (
-          <>
-            <PaystackPayment 
-              registrationData={formData}
-              onPaymentSuccess={handlePaymentSuccess}
-              onPaymentError={handlePaymentError}
-            />
-            <div className="mt-4 text-center text-sm text-gray-500">
-              <p>Secured by Paystack. Your payment information is encrypted and secure.</p>
-            </div>
-            <button
-              onClick={() => setSelectedMethod(null)}
-              className="mt-4 w-full text-center text-teal-500 hover:text-teal-600 text-sm"
-            >
-              ← Choose different payment method
-            </button>
-          </>
-        ) : (
-          <>
-            <MomoPayment 
-              registrationData={formData}
-              onPaymentSubmitted={handleMomoSubmitted}
-              onPaymentError={handlePaymentError}
-            />
-            <button
-              onClick={() => setSelectedMethod(null)}
-              className="mt-4 w-full text-center text-teal-500 hover:text-teal-600 text-sm"
-            >
-              ← Choose different payment method
-            </button>
-          </>
-        )}
+        <MomoPayment 
+          registrationData={formData}
+          onPaymentSubmitted={handleMomoSubmitted}
+          onPaymentError={handlePaymentError}
+        />
       </div>
 
       <div className="text-center text-sm text-gray-500">

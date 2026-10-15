@@ -70,7 +70,7 @@ const PaymentPoliciesPage = () => {
           <motion.div className="mb-10" variants={itemVariants}>
             <h3 className="text-2xl font-bold text-teal-800 mb-4">Payment Methods</h3>
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-6">
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,29 +96,6 @@ const PaymentPoliciesPage = () => {
                   <p className="text-sm text-gray-600">
                     When making payment, please use your unique registration code as the reference.
                   </p>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-800">Paystack (Credit/Debit Card)</h4>
-                    <p className="text-gray-600 text-sm">Secure online payment via Paystack payment gateway</p>
-                  </div>
-                </div>
-                <div className="ml-16">
-                  <p className="text-sm text-gray-600 mb-4">
-                    You can make payment using your credit or debit card through our secure Paystack payment gateway 
-                    during the registration process.
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 rounded-md border text-xs font-semibold bg-blue-50 border-blue-200 text-blue-700">VISA</span>
-                    <span className="px-3 py-1 rounded-md border text-xs font-semibold bg-red-50 border-red-200 text-red-700">MASTERCARD</span>
-                  </div>
                 </div>
               </div>
             </div>
