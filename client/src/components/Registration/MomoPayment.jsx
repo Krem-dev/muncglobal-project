@@ -21,8 +21,8 @@ const MomoPayment = ({ registrationData, onPaymentSubmitted, onPaymentError }) =
   const [error, setError] = useState('');
   const toast = useToast();
 
-  const MOMO_ACCOUNT_NUMBER = import.meta.env.VITE_MOMO_ACCOUNT_NUMBER || '055 298 1800';
-  const MOMO_ACCOUNT_NAME = import.meta.env.VITE_MOMO_ACCOUNT_NAME || ' MUNC-GLOBAL LBG';
+  const MOMO_ACCOUNT_NUMBER = import.meta.env.VITE_MOMO_ACCOUNT_NUMBER || '054 198 0652';
+  const MOMO_ACCOUNT_NAME = import.meta.env.VITE_MOMO_ACCOUNT_NAME || 'MUNC-GLOBAL LBG';
   const selectedFee = getRegistrationFeeByLevel(registrationData?.educationalLevel || 'BASIC SCHOOL');
 
   const handleSubmit = async (e) => {

@@ -86,11 +86,11 @@ const PaymentPoliciesPage = () => {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-gray-500">Account Name</p>
-                      <p className="font-medium">MUNC-GLOBAL</p>
+                      <p className="font-medium">MUNC-GLOBAL LBG</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">MoMo Number</p>
-                      <p className="font-medium">0504314485</p>
+                      <p className="font-medium">054 198 0652</p>
                     </div>
                   </div>
                   <p className="text-sm text-gray-600">
