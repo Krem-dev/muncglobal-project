@@ -58,6 +58,14 @@ Registration.init({
     type: DataTypes.STRING,
     allowNull: false
   },
+  accommodation_type: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  registration_amount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true
+  },
   nationality: {
     type: DataTypes.STRING,
     allowNull: false

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { motion } from 'framer-motion';
 import MomoPayment from './MomoPayment';
-import { getRegistrationFeeByLevel } from '../../config/constants';
+import { ACCOMMODATION_OPTIONS, getAccommodationFee } from '../../config/constants';
 
 const formatAmount = (amount, currency = 'GHS') => {
   const formatter = new Intl.NumberFormat('en-GH', {
@@ -16,7 +16,8 @@ const formatAmount = (amount, currency = 'GHS') => {
 const PaymentStep = ({ formData, onPaymentComplete }) => {
   const [error, setError] = useState('');
   const toast = useToast();
-  const totalFee = getRegistrationFeeByLevel(formData?.educationalLevel || 'BASIC SCHOOL');
+  const totalFee = formData?.registrationAmount || getAccommodationFee(formData?.accommodationType);
+  const accommodation = ACCOMMODATION_OPTIONS[formData?.accommodationType || 'fan'];
 
   const handlePaymentError = (error) => {
     console.error('Payment error:', error);
@@ -86,7 +87,7 @@ const PaymentStep = ({ formData, onPaymentComplete }) => {
 
         <div className="border-t border-gray-200 pt-4 mb-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-700">Registration Fee</span>
+            <span className="text-gray-700">Registration + {accommodation.label}</span>
             <span className="font-semibold">{formatAmount(totalFee)}</span>
           </div>
           <div className="flex justify-between items-center mb-2 text-sm text-gray-500">

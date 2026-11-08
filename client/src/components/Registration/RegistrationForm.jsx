@@ -7,6 +7,7 @@ import { useToast } from '../../context/ToastContext';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ACCOMMODATION_OPTIONS } from '../../config/constants';
 
 // Helper function to generate unique registration code
 const generateUniqueCode = () => {
@@ -30,6 +31,7 @@ const schema = yup.object().shape({
   phone: yup.string().required('Phone number is required'),
   postalAddress: yup.string(), 
   institution: yup.string().required('Institution name is required'),
+  accommodationType: yup.string().oneOf(Object.keys(ACCOMMODATION_OPTIONS)).required(),
   programOfStudy: yup.string().when('educationalLevel', {
     is: 'TERTIARY',
     then: () => yup.string().required('Program of study is required for tertiary students'),
@@ -73,7 +75,8 @@ const RegistrationForm = ({ onSubmit }) => {
       specialNeeds: '',
       specialNeedsDetails: '',
       emergencyRelationship: '',
-      emergencyRelationshipOther: ''
+      emergencyRelationshipOther: '',
+      accommodationType: 'fan'
     }
   });
   
@@ -81,6 +84,7 @@ const RegistrationForm = ({ onSubmit }) => {
   const watchSpecialNeeds = watch('specialNeeds');
   const watchHowHeard = watch('howHeard');
   const watchEmergencyRelationship = watch('emergencyRelationship');
+  const watchAccommodationType = watch('accommodationType');
   
   const handleFormSubmit = async (data) => {
     try {
@@ -98,6 +102,7 @@ const RegistrationForm = ({ onSubmit }) => {
         phoneNumber: data.phone,
         postalAddress: data.postalAddress || '',
         institution: data.institution,
+        accommodationType: data.accommodationType,
         programOfStudy: data.programOfStudy || '',
         educationalLevel: data.educationalLevel,
         nationality: data.nationality,
@@ -121,7 +126,9 @@ const RegistrationForm = ({ onSubmit }) => {
       if (registrationResponse.data.status !== 'success') {
         throw new Error(registrationResponse.data.message || 'Registration failed');
       }
-      
+
+      registrationData.registrationAmount = registrationResponse.data.data.registrationAmount;
+      registrationData.accommodationType = registrationResponse.data.data.accommodationType;
       sessionStorage.setItem('pendingRegistration', JSON.stringify(registrationData));
       
       onSubmit(registrationData);
@@ -387,6 +394,41 @@ const RegistrationForm = ({ onSubmit }) => {
           )}
 
         </div>
+
+        <section className="mb-6 rounded-lg border border-gray-200 bg-white p-5">
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">Choose your accommodation</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Both packages include conference registration. Choose one option.
+          </p>
+          <div className="grid gap-3 md:grid-cols-2">
+            {Object.entries(ACCOMMODATION_OPTIONS).map(([type, option]) => (
+              <label
+                key={type}
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
+                  watchAccommodationType === type
+                    ? 'border-teal-600 bg-teal-50 ring-1 ring-teal-600'
+                    : 'border-gray-200 bg-white hover:border-teal-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  value={type}
+                  {...register('accommodationType')}
+                  className="mt-1 h-4 w-4 accent-teal-600"
+                />
+                <span className="flex flex-1 items-start justify-between gap-3">
+                  <span>
+                    <span className="block font-semibold text-gray-900">{option.label}</span>
+                    <span className="mt-1 block text-sm text-gray-600">Shared accommodation</span>
+                  </span>
+                  <span className="whitespace-nowrap text-right font-semibold text-teal-700">
+                    GH₵ {option.price.toLocaleString('en-GH')}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </section>
 
         <div className="bg-teal-50 p-4 rounded-md mb-6">
           <h3 className="text-lg font-semibold text-teal-600 mb-2">Location Information</h3>

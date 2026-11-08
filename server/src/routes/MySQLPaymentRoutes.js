@@ -5,7 +5,11 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 import { sendPaymentConfirmationEmail } from '../utils/helpers.js';
 import { sendEmail } from '../utils/emailService.js';
-import { getRegistrationFeeAmount } from '../utils/registrationFee.js';
+import { DEFAULT_ACCOMMODATION_TYPE, getAccommodationFee } from '../utils/accommodation.js';
+import {
+  AccommodationUnavailableError,
+  markRegistrationAsPaid
+} from '../utils/accommodationInventory.js';
 
 // Initialize environment variables
 dotenv.config();
@@ -15,11 +19,8 @@ const router = express.Router();
 // Paystack configuration
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';
-const REGISTRATION_FEE = getRegistrationFeeAmount('BASIC SCHOOL');
-
 // Log Paystack configuration for debugging
 console.log('Paystack Secret Key available:', !!PAYSTACK_SECRET_KEY);
-console.log('Registration Fee:', REGISTRATION_FEE);
 
 /**
  * @route   POST /api/payment/initialize
@@ -28,8 +29,7 @@ console.log('Registration Fee:', REGISTRATION_FEE);
  */
 router.post('/initialize', async (req, res) => {
   try {
-    const { email, firstName, surname, registrationCode, educationalLevel } = req.body;
-    const amount = getRegistrationFeeAmount(educationalLevel || 'BASIC SCHOOL');
+    const { email, firstName, surname, registrationCode } = req.body;
     
     // Validate required fields
     if (!email || !firstName || !surname || !registrationCode) {
@@ -38,6 +38,16 @@ router.post('/initialize', async (req, res) => {
         message: 'Please provide email, firstName, surname, and registrationCode'
       });
     }
+
+    const registration = await Registration.findOne({
+      where: { registration_code: registrationCode }
+    });
+    if (!registration) {
+      return res.status(404).json({ status: 'error', message: 'Registration not found' });
+    }
+
+    const amount = Number(registration.registration_amount)
+      || getAccommodationFee(registration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE);
     
     // Convert amount to kobo/pesewas (smallest currency unit)
     const amountInPesewas = Math.round(amount * 100);
@@ -123,7 +133,10 @@ router.get('/config/public-key', (req, res) => {
       status: 'success',
       data: {
         publicKey,
-        amount: REGISTRATION_FEE
+        accommodationOptions: {
+          fan: getAccommodationFee('fan'),
+          aircon: getAccommodationFee('aircon')
+        }
       }
     });
   } catch (error) {
@@ -197,11 +210,17 @@ router.get('/verify/:reference', async (req, res) => {
     // If registration exists, update payment status
     if (existingRegistration) {
       console.log('Found existing registration:', existingRegistration.id, existingRegistration.registration_code);
-      
-      await existingRegistration.update({
-        payment_status: 'paid',
-        payment_method: 'paystack'
-      });
+
+      const expectedAmount = Number(existingRegistration.registration_amount)
+        || getAccommodationFee(existingRegistration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE);
+      if (Number(transactionData.amount) !== Math.round(expectedAmount * 100)) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Payment amount does not match the registration accommodation price'
+        });
+      }
+
+      await markRegistrationAsPaid(registrationCode, 'paystack');
       
       console.log('Updated registration payment status');
       
@@ -235,6 +254,13 @@ router.get('/verify/:reference', async (req, res) => {
     });
   } catch (error) {
     console.error('Payment verification error:', error.response?.data || error.message);
+    if (error instanceof AccommodationUnavailableError) {
+      return res.status(409).json({
+        status: 'error',
+        paymentReceived: true,
+        message: 'Payment was received, but this accommodation could not be confirmed as available. Please contact the organizers for assistance.'
+      });
+    }
     res.status(500).json({
       status: 'error',
       message: 'An error occurred while verifying payment',
@@ -267,7 +293,7 @@ router.post('/webhook', async (req, res) => {
       const data = event.data;
       const reference = data.reference;
       const registrationCode = data.metadata?.registration_code || 
-                              reference.split('-')[0]; // Extract from reference if metadata not available
+                              reference.split('-').slice(0, 3).join('-');
       
       if (registrationCode) {
         // Get registration ID from registration code
@@ -282,19 +308,22 @@ router.post('/webhook', async (req, res) => {
           });
           
           if (!existingPayment) {
+            const expectedAmount = Number(registration.registration_amount)
+              || getAccommodationFee(registration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE);
+            if (Number(data.amount) !== Math.round(expectedAmount * 100)) {
+              throw new Error('Paystack webhook amount does not match the registration accommodation price');
+            }
+
+            const paidRegistration = await markRegistrationAsPaid(registrationCode, 'paystack');
+
             // Insert payment record
             await Payment.create({
-              registration_id: registration.id,
+              registration_id: paidRegistration.id,
               transaction_id: data.id,
               amount: data.amount / 100, // Convert from pesewas back to GHS
               status: 'success',
               payment_method: data.channel || 'paystack',
               currency: data.currency
-            });
-            
-            // Update registration payment status
-            await registration.update({ 
-              payment_status: 'paid'
             });
             
             console.log('Webhook - Updated registration payment status');
@@ -306,7 +335,7 @@ router.post('/webhook', async (req, res) => {
             );
             
             // Get updated registration - force a refresh from database
-            const updatedRegistration = await Registration.findByPk(registration.id, {
+            const updatedRegistration = await Registration.findByPk(paidRegistration.id, {
               raw: false // Ensure we get a model instance, not a plain object
             });
             
@@ -393,8 +422,16 @@ router.get('/amount', (req, res) => {
     return res.status(200).json({
       status: 'success',
       data: {
-        amount: REGISTRATION_FEE,
-        amountInPesewas: REGISTRATION_FEE * 100
+        accommodationOptions: {
+          fan: {
+            amount: getAccommodationFee('fan'),
+            amountInPesewas: getAccommodationFee('fan') * 100
+          },
+          aircon: {
+            amount: getAccommodationFee('aircon'),
+            amountInPesewas: getAccommodationFee('aircon') * 100
+          }
+        }
       }
     });
   } catch (error) {

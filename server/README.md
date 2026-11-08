@@ -4,11 +4,11 @@ Backend server for the MUNCGLOBAL website, handling registration, payment proces
 
 ## Features
 
-- Registration API for MUNC-GH 2025 conference
+- Registration API with accommodation-based pricing and room/bed availability
 - Payment processing with Paystack integration
 - Unique delegate ID generation
 - Email notifications
-- SQLite database for data storage
+- MySQL database for data storage
 
 ## Setup
 
@@ -72,6 +72,7 @@ npm start
     "institution": "University of Ghana",
     "programOfStudy": "Political Science",
     "educationalLevel": "Undergraduate",
+    "accommodationType": "fan",
     "nationality": "Ghanaian",
     "city": "Accra",
     "emergencyContactName": "Jane Doe",

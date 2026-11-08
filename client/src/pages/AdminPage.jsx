@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { API_BASE_URL } from '../config/constants.js';
+import { ACCOMMODATION_OPTIONS, API_BASE_URL, getAccommodationFee } from '../config/constants.js';
 
 const AdminPage = () => {
   const [apiKey, setApiKey] = useState('');
@@ -12,7 +12,8 @@ const AdminPage = () => {
   const [deletingId, setDeletingId] = useState(null);
   const [selectedYear, setSelectedYear] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [registrationFee, setRegistrationFee] = useState(970);
+  const [registrationFee, setRegistrationFee] = useState(getAccommodationFee());
+  const [accommodationAvailability, setAccommodationAvailability] = useState(null);
 
   const fetchRegistrations = async (key) => {
     setLoading(true);
@@ -24,6 +25,7 @@ const AdminPage = () => {
       if (!response.ok) throw new Error('Failed to fetch registrations');
       const data = await response.json();
       setRegistrations(data.data || []);
+      setAccommodationAvailability(data.accommodationAvailability || null);
       if (data.financials?.registrationFee) {
         setRegistrationFee(data.financials.registrationFee);
       }
@@ -151,10 +153,15 @@ const AdminPage = () => {
     const paid = data.filter(r => r.payment_status === 'paid').length;
     const pending = data.filter(r => r.payment_status === 'pending').length;
     const momoVerify = data.filter(r => r.payment_status === 'pending_verification').length;
-    const totalExpected = total * registrationFee;
+    const totalExpected = data.reduce((sum, registration) => (
+      sum + (Number(registration.registration_amount)
+        || getAccommodationFee(registration.accommodation_type || 'fan'))
+    ), 0);
     const totalCollected = data
       .filter(r => r.payment_status === 'paid')
-      .reduce((sum, r) => sum + (Number(r.Payments?.[0]?.amount) || registrationFee), 0);
+      .reduce((sum, r) => sum + (Number(r.Payments?.[0]?.amount)
+        || Number(r.registration_amount)
+        || getAccommodationFee(r.accommodation_type || 'fan')), 0);
     return { total, paid, pending, momoVerify, totalExpected, totalCollected, outstanding: totalExpected - totalCollected };
   }, [yearFiltered, registrationFee]);
 
@@ -311,7 +318,7 @@ const AdminPage = () => {
             <p className="text-3xl font-bold text-slate-900 mt-2">
               <span className="text-lg font-medium text-slate-400">GH₵</span>{formatCurrency(stats.totalExpected)}
             </p>
-            <p className="text-xs text-slate-400 mt-3">{stats.total} × GH₵{formatCurrency(registrationFee)}</p>
+            <p className="text-xs text-slate-400 mt-3">Based on selected accommodation</p>
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 p-5">
@@ -335,6 +342,37 @@ const AdminPage = () => {
             <p className="text-xs text-slate-400 mt-3">{stats.pending + stats.momoVerify} unpaid registrations</p>
           </div>
         </div>
+
+        <section className="bg-white rounded-xl border border-slate-200 p-5">
+          <h2 className="text-sm font-semibold text-slate-900 mb-4">Accommodation Availability</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {Object.entries(ACCOMMODATION_OPTIONS).map(([type, option]) => {
+              const availability = accommodationAvailability?.[type];
+              return (
+                <div key={type} className="rounded-lg border border-slate-200 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-slate-900">{option.label}</p>
+                      <p className="text-xs text-slate-500">GH₵{formatCurrency(option.price)} per delegate</p>
+                    </div>
+                    <span className="text-xs text-slate-500">
+                      {availability?.occupiedBeds ?? 0}/{option.beds} beds assigned
+                    </span>
+                  </div>
+                  <div className="mt-3 flex gap-6 text-sm">
+                    <p className="text-slate-600">
+                      <span className="font-semibold text-slate-900">{availability?.remainingRooms ?? option.rooms}</span> rooms available
+                    </p>
+                    <p className="text-slate-600">
+                      <span className="font-semibold text-slate-900">{availability?.remainingBeds ?? option.beds}</span> beds available
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-xs text-slate-400">Availability counts confirmed registrations only.</p>
+        </section>
 
         {/* Error */}
         {error && (
@@ -404,8 +442,9 @@ const AdminPage = () => {
                     <th className="w-[16%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Email</th>
                     <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Phone</th>
                     <th className="w-[14%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Institution</th>
-                    <th className="w-[9%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Status</th>
-                    <th className="w-[7%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Amount</th>
+                    <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Status</th>
+                    <th className="w-[11%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Accommodation</th>
+                    <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Amount</th>
                     <th className="w-[12%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Emergency</th>
                     <th className="w-[7%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Date</th>
                     <th className="w-[9%] px-2 py-3 text-left text-xs font-medium text-slate-400 uppercase">Action</th>
@@ -414,7 +453,7 @@ const AdminPage = () => {
                 <tbody className="divide-y divide-slate-50">
                   {filteredRegistrations.length === 0 ? (
                     <tr>
-                      <td colSpan={10} className="px-2 py-12 text-center text-slate-400">
+                      <td colSpan={11} className="px-2 py-12 text-center text-slate-400">
                         No registrations found{searchQuery ? ` for "${searchQuery}"` : ''}.
                       </td>
                     </tr>
@@ -440,9 +479,12 @@ const AdminPage = () => {
                             {reg.payment_status === 'pending_verification' ? 'Verifying' : reg.payment_status}
                           </span>
                         </td>
+                        <td className="px-2 py-2.5 text-slate-600 text-xs">
+                          {ACCOMMODATION_OPTIONS[reg.accommodation_type]?.label || 'Legacy / unspecified'}
+                        </td>
                         <td className="px-2 py-2.5 text-slate-600 text-xs font-mono">
-                          {(reg.Payments?.[0]?.amount || reg.payment_status === 'paid')
-                            ? `₵${formatCurrency(reg.Payments?.[0]?.amount || registrationFee)}`
+                          {(reg.Payments?.[0]?.amount || reg.registration_amount || reg.payment_status === 'paid')
+                            ? `₵${formatCurrency(reg.Payments?.[0]?.amount || reg.registration_amount || registrationFee)}`
                             : '—'
                           }
                         </td>

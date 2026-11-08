@@ -1,8 +1,19 @@
 import express from 'express';
 import ExcelJS from 'exceljs';
-import { runQuery, getQuery, getAllQuery, Registration, Payment } from '../config/databaseMySQL.js';
+import axios from 'axios';
+import { runQuery, getQuery, getAllQuery, Registration, Payment, AccommodationInventory } from '../config/databaseMySQL.js';
 import { sendRegistrationEmail, sendPaymentConfirmationEmail } from '../utils/helpers.js';
-import { getRegistrationFeeAmount } from '../utils/registrationFee.js';
+import sequelize from '../config/sequelizeConfig.js';
+import {
+  DEFAULT_ACCOMMODATION_TYPE,
+  getAccommodationFee,
+  normalizeAccommodationType
+} from '../utils/accommodation.js';
+import {
+  AccommodationUnavailableError,
+  getAccommodationAvailability,
+  markRegistrationAsPaid
+} from '../utils/accommodationInventory.js';
 
 const router = express.Router();
 
@@ -25,6 +36,7 @@ router.post('/', async (req, res) => {
       institution,
       programOfStudy,
       educationalLevel,
+      accommodationType: requestedAccommodationType,
       nationality,
       city,
       committeePreference,
@@ -48,6 +60,22 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ 
         status: 'error', 
         message: 'Please provide all required fields' 
+      });
+    }
+
+    const accommodationType = normalizeAccommodationType(requestedAccommodationType || DEFAULT_ACCOMMODATION_TYPE);
+    if (!accommodationType) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Please select a valid accommodation option'
+      });
+    }
+
+    const availability = await getAccommodationAvailability();
+    if (availability[accommodationType].remainingBeds <= 0) {
+      return res.status(409).json({
+        status: 'error',
+        message: 'This accommodation option is fully booked'
       });
     }
 
@@ -76,6 +104,8 @@ router.post('/', async (req, res) => {
       institution: institution,
       program_of_study: programOfStudy || null,
       educational_level: educationalLevel,
+      accommodation_type: accommodationType,
+      registration_amount: getAccommodationFee(accommodationType),
       nationality: nationality,
       city: city,
       committee_preference: committeePreference || 'To be assigned',
@@ -96,7 +126,9 @@ router.post('/', async (req, res) => {
       message: 'Registration successful',
       data: {
         registrationCode,
-        registrationId: registration.id
+        registrationId: registration.id,
+        accommodationType,
+        registrationAmount: getAccommodationFee(accommodationType)
       }
     });
 
@@ -213,7 +245,7 @@ router.get('/', async (req, res) => {
         'id', 'registration_code', 'first_name', 'surname', 'email', 'phone_number',
         'institution', 'nationality', 'created_at', 'payment_status', 'payment_reference',
         'emergency_contact_name', 'emergency_contact_number', 'emergency_contact_relationship',
-        'payment_method'
+        'payment_method', 'accommodation_type', 'registration_amount'
       ],
       include: [{
         model: Payment,
@@ -225,16 +257,16 @@ router.get('/', async (req, res) => {
     // Convert to plain objects
     const registrationsData = registrations.map(reg => reg.get({ plain: true }));
     
-    // Calculate financial totals using the configured fee by level, with a safe default fallback
-    const registrationFee = getRegistrationFeeAmount('BASIC SCHOOL');
-    const totalExpected = registrationsData.reduce((sum, reg) => {
-      const levelFee = getRegistrationFeeAmount(reg.educational_level || 'BASIC SCHOOL');
-      return sum + levelFee;
-    }, 0);
+    // Keep finance totals and room availability independent of education level.
+    const registrationFee = getAccommodationFee(DEFAULT_ACCOMMODATION_TYPE);
+    const totalExpected = registrationsData.reduce((sum, reg) => (
+      sum + (Number(reg.registration_amount) || getAccommodationFee(reg.accommodation_type || DEFAULT_ACCOMMODATION_TYPE))
+    ), 0);
     const totalPaid = registrationsData
       .filter(reg => reg.payment_status === 'paid')
-      .reduce((sum, reg) => sum + (Number(reg.Payment?.amount) || getRegistrationFeeAmount(reg.educational_level || 'BASIC SCHOOL')), 0);
+      .reduce((sum, reg) => sum + (Number(reg.Payment?.amount) || Number(reg.registration_amount) || registrationFee), 0);
     const totalPending = totalExpected - totalPaid;
+    const accommodationAvailability = await getAccommodationAvailability();
     
     res.status(200).json({
       status: 'success',
@@ -243,12 +275,13 @@ router.get('/', async (req, res) => {
       financials: {
         registrationFee: registrationFee,
         totalRegistrations: registrationsData.length,
-        totalExpected: totalExpected,
-        totalPaid: totalPaid,
-        totalPending: totalPending,
+        totalExpected,
+        totalPaid,
+        totalPending,
         paidCount: registrationsData.filter(reg => reg.payment_status === 'paid').length,
         pendingCount: registrationsData.filter(reg => reg.payment_status === 'pending').length
-      }
+      },
+      accommodationAvailability
     });
   } catch (error) {
     console.error('Error fetching registrations:', error);
@@ -322,6 +355,7 @@ router.post('/complete', async (req, res) => {
       institution,
       programOfStudy,
       educationalLevel,
+      accommodationType: requestedAccommodationType,
       nationality,
       city,
       committeePreference,
@@ -334,8 +368,7 @@ router.post('/complete', async (req, res) => {
       howHeard,
       howHeardOther,
       registrationCode,
-      paymentReference,
-      paymentVerified
+      paymentReference
     } = req.body;
 
     console.log('Registration completion request for:', registrationCode);
@@ -343,8 +376,8 @@ router.post('/complete', async (req, res) => {
     // Validate required fields
     if (!firstName || !surname || !dateOfBirth || !gender || !phoneNumber || 
         !email || !institution || !educationalLevel || !nationality || !city || 
-        !emergencyContact || !emergencyPhone || !emergencyRelationship || 
-        !previousExperience || !howHeard || !registrationCode || !paymentReference || !paymentVerified) {
+        !emergencyContact || !emergencyPhone || !emergencyRelationship ||
+        !previousExperience || !howHeard || !registrationCode || !paymentReference) {
       return res.status(400).json({ 
         status: 'error', 
         message: 'Please provide all required fields including payment verification' 
@@ -363,8 +396,65 @@ router.post('/complete', async (req, res) => {
       });
     }
 
-    // Insert registration into database with paid status
-    const registration = await Registration.create({
+    const accommodationType = normalizeAccommodationType(requestedAccommodationType || DEFAULT_ACCOMMODATION_TYPE);
+    if (!accommodationType) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Please select a valid accommodation option'
+      });
+    }
+
+    if (!process.env.PAYSTACK_SECRET_KEY) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Payment verification is unavailable'
+      });
+    }
+
+    const paymentResponse = await axios.get(
+      `https://api.paystack.co/transaction/verify/${encodeURIComponent(paymentReference)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    const payment = paymentResponse.data.data;
+    const referenceMatchesRegistration = paymentReference === registrationCode
+      || paymentReference.startsWith(`${registrationCode}-`);
+    if (
+      payment.status !== 'success'
+      || payment.currency !== 'GHS'
+      || Number(payment.amount) !== Math.round(getAccommodationFee(accommodationType) * 100)
+      || (payment.metadata?.registration_code
+        ? payment.metadata.registration_code !== registrationCode
+        : !referenceMatchesRegistration)
+    ) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Payment could not be verified for this registration and accommodation'
+      });
+    }
+
+    const registration = await sequelize.transaction(async (transaction) => {
+      const inventory = await AccommodationInventory.findByPk(accommodationType, {
+        transaction,
+        lock: transaction.LOCK.UPDATE
+      });
+      if (!inventory) {
+        throw new Error(`Accommodation inventory is not configured for ${accommodationType}`);
+      }
+
+      const occupiedBeds = await Registration.count({
+        where: { accommodation_type: accommodationType, payment_status: 'paid' },
+        transaction
+      });
+      if (occupiedBeds >= inventory.beds) {
+        throw new AccommodationUnavailableError('This accommodation option is fully booked');
+      }
+
+      return Registration.create({
       registration_code: registrationCode,
       first_name: firstName,
       middle_name: middleName || null,
@@ -377,6 +467,8 @@ router.post('/complete', async (req, res) => {
       institution: institution,
       program_of_study: programOfStudy,
       educational_level: educationalLevel,
+      accommodation_type: accommodationType,
+      registration_amount: getAccommodationFee(accommodationType),
       nationality: nationality,
       city: city,
       committee_preference: committeePreference,
@@ -390,7 +482,20 @@ router.post('/complete', async (req, res) => {
       how_heard_other: howHeard === 'Other' ? howHeardOther : null,
       payment_status: 'paid',
       payment_reference: paymentReference
+      }, { transaction });
+    }).catch((error) => {
+      if (error instanceof AccommodationUnavailableError) {
+        return null;
+      }
+      throw error;
     });
+
+    if (!registration) {
+      return res.status(409).json({
+        status: 'error',
+        message: 'This accommodation option is fully booked'
+      });
+    }
 
     console.log('Registration completed successfully for:', registrationCode);
 
@@ -465,6 +570,8 @@ router.get('/export/excel', async (req, res) => {
       { header: 'Institution', key: 'institution', width: 30 },
       { header: 'Program of Study', key: 'program_of_study', width: 22 },
       { header: 'Educational Level', key: 'educational_level', width: 18 },
+      { header: 'Accommodation', key: 'accommodation_type', width: 24 },
+      { header: 'Registration Amount', key: 'registration_amount', width: 20 },
       { header: 'Nationality', key: 'nationality', width: 14 },
       { header: 'City', key: 'city', width: 14 },
       { header: 'Committee Preference', key: 'committee_preference', width: 22 },
@@ -547,6 +654,8 @@ router.get('/export/csv', async (req, res) => {
       'Institution',
       'Program of Study',
       'Educational Level',
+      'Accommodation Type',
+      'Registration Amount',
       'Nationality',
       'City',
       'Committee Preference',
@@ -576,6 +685,8 @@ router.get('/export/csv', async (req, res) => {
       reg.institution || '',
       reg.program_of_study || '',
       reg.educational_level || '',
+      reg.accommodation_type || '',
+      reg.registration_amount || '',
       reg.nationality || '',
       reg.city || '',
       reg.committee_preference || '',
@@ -662,6 +773,15 @@ router.post('/momo-payment', async (req, res) => {
       });
     }
 
+    const accommodationType = normalizeAccommodationType(registration.accommodation_type);
+    const availability = await getAccommodationAvailability();
+    if (!accommodationType || availability[accommodationType].remainingBeds <= 0) {
+      return res.status(409).json({
+        status: 'error',
+        message: 'This accommodation option is fully booked'
+      });
+    }
+
     await registration.update({
       payment_method: 'momo',
       payment_reference: transactionId,
@@ -731,24 +851,28 @@ router.post('/confirm-momo/:registrationCode', async (req, res) => {
       });
     }
 
-    await registration.update({
-      payment_status: 'paid'
-    });
+    const updatedRegistration = await markRegistrationAsPaid(registrationCode);
 
     res.status(200).json({
       status: 'success',
       message: 'MoMo payment confirmed successfully',
       data: {
-        registrationCode: registration.registration_code,
+        registrationCode: updatedRegistration.registration_code,
         paymentStatus: 'paid'
       }
     });
 
-    Registration.findByPk(registration.id)
+    Registration.findByPk(updatedRegistration.id)
       .then(updatedRegistration => sendPaymentConfirmationEmail(updatedRegistration))
       .then(() => console.log(`Payment confirmation email sent to ${registration.email}`))
       .catch(err => console.error('Error sending payment confirmation email:', err));
   } catch (error) {
+    if (error instanceof AccommodationUnavailableError) {
+      return res.status(409).json({
+        status: 'error',
+        message: error.message
+      });
+    }
     console.error('Error confirming MoMo payment:', error);
     res.status(500).json({
       status: 'error',

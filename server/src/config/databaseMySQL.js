@@ -1,5 +1,7 @@
-import { Registration, Payment, PaymentInitialization } from '../models/index.js';
+import { DataTypes } from 'sequelize';
+import { Registration, Payment, PaymentInitialization, AccommodationInventory } from '../models/index.js';
 import sequelize from './sequelizeConfig.js';
+import { ACCOMMODATION_OPTIONS } from '../utils/accommodation.js';
 
 // Initialize database connection
 export const initializeDatabase = async () => {
@@ -8,8 +10,31 @@ export const initializeDatabase = async () => {
     await sequelize.authenticate();
     console.log('Connection to Aiven MySQL has been established successfully.');
     
-    // Sync models without altering existing schema (table already exists in production)
+    // Sync new tables, then apply additive columns to existing registration tables.
     await sequelize.sync();
+    const registrationColumns = await sequelize.getQueryInterface().describeTable('registrations');
+    if (!registrationColumns.accommodation_type) {
+      await sequelize.getQueryInterface().addColumn('registrations', 'accommodation_type', {
+        type: DataTypes.STRING,
+        allowNull: true
+      });
+    }
+    if (!registrationColumns.registration_amount) {
+      await sequelize.getQueryInterface().addColumn('registrations', 'registration_amount', {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+      });
+    }
+
+    for (const [accommodationType, option] of Object.entries(ACCOMMODATION_OPTIONS)) {
+      await AccommodationInventory.findOrCreate({
+        where: { accommodation_type: accommodationType },
+        defaults: {
+          rooms: option.rooms,
+          beds: option.beds
+        }
+      });
+    }
     console.log('Database models synchronized');
     
     return true;
@@ -60,4 +85,4 @@ export const getAllQuery = async (query, params = {}) => {
 };
 
 // Export models
-export { Registration, Payment, PaymentInitialization };
+export { Registration, Payment, PaymentInitialization, AccommodationInventory };

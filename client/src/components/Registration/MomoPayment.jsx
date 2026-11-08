@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
 import { motion } from 'framer-motion';
-import { getRegistrationFeeByLevel } from '../../config/constants';
+import { getAccommodationFee } from '../../config/constants';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://muncglobal-project-server.onrender.com/api';
 
@@ -23,7 +23,7 @@ const MomoPayment = ({ registrationData, onPaymentSubmitted, onPaymentError }) =
 
   const MOMO_ACCOUNT_NUMBER = import.meta.env.VITE_MOMO_ACCOUNT_NUMBER || '054 198 0652';
   const MOMO_ACCOUNT_NAME = import.meta.env.VITE_MOMO_ACCOUNT_NAME || 'MUNC-GLOBAL LBG';
-  const selectedFee = getRegistrationFeeByLevel(registrationData?.educationalLevel || 'BASIC SCHOOL');
+  const selectedFee = registrationData?.registrationAmount || getAccommodationFee(registrationData?.accommodationType);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

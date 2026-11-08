@@ -3,7 +3,7 @@ import { useToast } from '../../context/ToastContext';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { API_BASE_URL, REGISTRATION_FEE } from '../../config/constants';
+import { ACCOMMODATION_OPTIONS, API_BASE_URL, getAccommodationFee } from '../../config/constants';
 
 // Format amount for display
 const formatAmount = (amount, currency = 'GHS') => {
@@ -22,6 +22,9 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
   const registrationCodeRef = useRef(null);
   const [copiedCode, setCopiedCode] = useState(false);
   const toast = useToast();
+  const registrationAmount = Number(registrationDetails?.registration_amount || formData?.registrationAmount)
+    || getAccommodationFee(registrationDetails?.accommodation_type || formData?.accommodationType);
+  const accommodationType = registrationDetails?.accommodation_type || formData?.accommodationType || 'fan';
   
   useEffect(() => {
     if (formData?.firstName) {
@@ -179,6 +182,10 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
             <p className="font-medium">{formData.educationalLevel}</p>
           </div>
           <div>
+            <p className="text-gray-600 text-sm">Accommodation</p>
+            <p className="font-medium">{ACCOMMODATION_OPTIONS[accommodationType]?.label || ACCOMMODATION_OPTIONS.fan.label}</p>
+          </div>
+          <div>
             <p className="text-gray-600 text-sm">Registration Code</p>
             <p className="font-medium">{formData.registrationCode}</p>
           </div>
@@ -217,7 +224,7 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Amount</p>
-              <p className="font-medium">{formatAmount(REGISTRATION_FEE)}</p>
+              <p className="font-medium">{formatAmount(registrationAmount)}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Transaction Reference</p>
@@ -248,7 +255,7 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-700">Registration Fee</span>
-              <span className="font-semibold">{formatAmount(REGISTRATION_FEE)}</span>
+              <span className="font-semibold">{formatAmount(registrationAmount)}</span>
             </div>
             <div className="flex justify-between items-center mb-2 text-sm text-gray-500">
               <span>Transaction Fee</span>
@@ -256,7 +263,7 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
             </div>
             <div className="flex justify-between items-center font-bold text-lg mt-4 pt-2 border-t border-gray-200">
               <span>Total</span>
-              <span>{formatAmount(REGISTRATION_FEE)}</span>
+              <span>{formatAmount(registrationAmount)}</span>
             </div>
           </div>
           

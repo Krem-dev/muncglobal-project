@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import nodemailer from 'nodemailer';
+import { DEFAULT_ACCOMMODATION_TYPE, getAccommodationFee } from './accommodation.js';
 
 /**
  * Generate a unique registration code
@@ -149,11 +150,6 @@ export const uniqueCodePool = generateUniqueCodePool();
 
 
 export const sendPaymentConfirmationEmail = async (registration) => {
-  // Get the registration fee from environment variable
-  const registrationFee = (() => {
-    const fee = Number(process.env.REGISTRATION_FEE ?? 970);
-    return Number.isFinite(fee) && fee > 0 ? fee : 970;
-  })();
   try {
     console.log('Payment confirmation email - Registration data:', JSON.stringify(registration));
     
@@ -165,6 +161,9 @@ export const sendPaymentConfirmationEmail = async (registration) => {
     const surname = registrationData.surname;
     const email = registrationData.email;
     const registration_code = registrationData.registration_code;
+    const accommodationType = registrationData.accommodation_type || DEFAULT_ACCOMMODATION_TYPE;
+    const registrationAmount = Number(registrationData.registration_amount)
+      || getAccommodationFee(accommodationType);
     
     // Log all properties to help debug
     console.log('Registration object keys:', Object.keys(registrationData));
@@ -191,18 +190,19 @@ export const sendPaymentConfirmationEmail = async (registration) => {
     });
     
     // Email subject
-    const subject = 'MUNCGLOBAL Conference 2025 - Payment Confirmation';
+    const subject = 'MUNCGLOBAL Conference 2027 - Payment Confirmation';
     
     // Email text content
     const text = `
       Dear ${first_name} ${surname},
 
-      Thank you for completing your payment for MUNCGLOBAL Conference 2025!
+      Thank you for completing your payment for MUNCGLOBAL Conference 2027!
 
       Your registration code is: ${registration_code}
 
       Payment details:
-      - Amount: GHS ${registrationFee}
+      - Accommodation: ${accommodationType}
+      - Amount: GHS ${registrationAmount}
       - Date: ${formattedDate}
       - Status: Confirmed
 
@@ -224,12 +224,13 @@ export const sendPaymentConfirmationEmail = async (registration) => {
 
         <p>Dear <strong>${first_name} ${surname}</strong>,</p>
 
-        <p>Thank you for completing your payment for <strong>MUNCGLOBAL Conference 2025</strong>!</p>
+        <p>Thank you for completing your payment for <strong>MUNCGLOBAL Conference 2027</strong>!</p>
 
         <div style="background-color: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #1E40AF;">Payment Confirmed</h3>
           <p><strong>Registration Code:</strong> ${registration_code}</p>
-          <p><strong>Amount:</strong> GHS ${registrationFee}</p>
+          <p><strong>Accommodation:</strong> ${accommodationType}</p>
+          <p><strong>Amount:</strong> GHS ${registrationAmount}</p>
           <p><strong>Date:</strong> ${formattedDate}</p>
           <p><strong>Status:</strong> <span style="color: #047857; font-weight: bold;">Confirmed</span></p>
         </div>
@@ -246,7 +247,7 @@ export const sendPaymentConfirmationEmail = async (registration) => {
         <p>Best regards,<br>MUNCGLOBAL Team</p>
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 12px; color: #6b7280;">
-          <p>MUNCGLOBAL Conference 2025 | Kwame Nkrumah University of Science and Technology</p>
+          <p>MUNCGLOBAL Conference 2027 | Kwame Nkrumah University of Science and Technology</p>
         </div>
       </div>
     `;

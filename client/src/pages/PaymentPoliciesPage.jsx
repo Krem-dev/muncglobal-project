@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { ACCOMMODATION_OPTIONS } from '../config/constants';
 
 const PaymentPoliciesPage = () => {
   // Animation variants
@@ -52,7 +53,13 @@ const PaymentPoliciesPage = () => {
             <div className="flex flex-col md:flex-row justify-between items-center mb-6">
               <div>
                 <p className="text-gray-700 mb-2">Standard Registration Fee:</p>
-                <p className="text-3xl font-bold text-green-700">GH₵ 970</p>
+                <div className="space-y-2">
+                  {Object.values(ACCOMMODATION_OPTIONS).map((option) => (
+                    <p key={option.label} className="text-xl font-bold text-green-700">
+                      {option.label}: GH₵ {option.price.toLocaleString('en-GH')}
+                    </p>
+                  ))}
+                </div>
               </div>
               <div className="mt-4 md:mt-0">
                 <p className="text-gray-700 mb-2">Registration Deadline:</p>
@@ -60,8 +67,9 @@ const PaymentPoliciesPage = () => {
             </div>
             <div className="bg-white p-4 rounded-md">
               <p className="text-gray-700 text-sm">
-                The registration fee covers conference materials, delegate package, certificate of participation, 
-                refreshments during the conference, and access to all conference sessions and events.
+                The registration fee covers conference materials, delegate package, certificate of participation, refreshments
+                during the conference, and access to all conference sessions and events. Prices also include shared
+                accommodation, selected during registration; fan accommodation is selected by default.
               </p>
             </div>
           </motion.div>
