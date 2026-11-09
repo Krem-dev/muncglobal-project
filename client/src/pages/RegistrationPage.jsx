@@ -86,7 +86,7 @@ const RegistrationPage = () => {
             </div>
           )}
 
-          <div className="rounded-[2rem] border border-yellow-200 bg-gradient-to-br from-yellow-50 via-white to-teal-50 p-8 shadow-sm">
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
             <>
               {step === 1 && (
                 <RegistrationForm onSubmit={handleFormSubmit} />
