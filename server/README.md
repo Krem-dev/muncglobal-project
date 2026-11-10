@@ -72,7 +72,7 @@ npm start
     "institution": "University of Ghana",
     "programOfStudy": "Political Science",
     "educationalLevel": "Undergraduate",
-    "accommodationType": "fan",
+    "accommodationType": "four_fan",
     "nationality": "Ghanaian",
     "city": "Accra",
     "emergencyContactName": "Jane Doe",
@@ -89,6 +89,7 @@ npm start
     }
   }
   ```
+- Supported accommodation packages are `four_fan` (4 in 1 with fan, GH₵970; default, no capacity tracking), `fan` (2 in 1 with fan, GH₵1,350; 680 rooms / 1,360 beds), and `aircon` (2 in 1 with air conditioning, GH₵1,500; 132 rooms / 264 beds).
 - **Response**:
   ```json
   {

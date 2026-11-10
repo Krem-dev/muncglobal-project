@@ -5,7 +5,11 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 import { sendPaymentConfirmationEmail } from '../utils/helpers.js';
 import { sendEmail } from '../utils/emailService.js';
-import { DEFAULT_ACCOMMODATION_TYPE, getAccommodationFee } from '../utils/accommodation.js';
+import {
+  ACCOMMODATION_OPTIONS,
+  DEFAULT_ACCOMMODATION_TYPE,
+  getAccommodationFee
+} from '../utils/accommodation.js';
 import {
   AccommodationUnavailableError,
   markRegistrationAsPaid
@@ -133,10 +137,9 @@ router.get('/config/public-key', (req, res) => {
       status: 'success',
       data: {
         publicKey,
-        accommodationOptions: {
-          fan: getAccommodationFee('fan'),
-          aircon: getAccommodationFee('aircon')
-        }
+        accommodationOptions: Object.fromEntries(
+          Object.keys(ACCOMMODATION_OPTIONS).map((type) => [type, getAccommodationFee(type)])
+        )
       }
     });
   } catch (error) {
@@ -422,16 +425,15 @@ router.get('/amount', (req, res) => {
     return res.status(200).json({
       status: 'success',
       data: {
-        accommodationOptions: {
-          fan: {
-            amount: getAccommodationFee('fan'),
-            amountInPesewas: getAccommodationFee('fan') * 100
-          },
-          aircon: {
-            amount: getAccommodationFee('aircon'),
-            amountInPesewas: getAccommodationFee('aircon') * 100
-          }
-        }
+        accommodationOptions: Object.fromEntries(
+          Object.keys(ACCOMMODATION_OPTIONS).map((type) => {
+            const amount = getAccommodationFee(type);
+            return [type, {
+              amount,
+              amountInPesewas: amount * 100
+            }];
+          })
+        )
       }
     });
   } catch (error) {

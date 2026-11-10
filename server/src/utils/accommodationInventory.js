@@ -1,7 +1,11 @@
 import sequelize from '../config/sequelizeConfig.js';
 import AccommodationInventory from '../models/AccommodationInventory.js';
 import Registration from '../models/Registration.js';
-import { calculateAccommodationAvailability, normalizeAccommodationType } from './accommodation.js';
+import {
+  calculateAccommodationAvailability,
+  isAccommodationCapacityTracked,
+  normalizeAccommodationType
+} from './accommodation.js';
 
 export class AccommodationUnavailableError extends Error {
   constructor(message) {
@@ -27,6 +31,8 @@ export const getAccommodationAvailability = async () => {
   const availability = calculateAccommodationAvailability(occupiedBeds);
 
   for (const option of inventory) {
+    if (!isAccommodationCapacityTracked(option.accommodation_type)) continue;
+
     if (availability[option.accommodation_type]) {
       availability[option.accommodation_type].rooms = option.rooms;
       availability[option.accommodation_type].beds = option.beds;
@@ -65,25 +71,27 @@ export const markRegistrationAsPaid = async (registrationCode, paymentMethod) =>
       throw new AccommodationUnavailableError('Registration has no valid accommodation choice');
     }
 
-    const inventory = await AccommodationInventory.findByPk(accommodationType, {
-      transaction,
-      lock: transaction.LOCK.UPDATE
-    });
+    if (isAccommodationCapacityTracked(accommodationType)) {
+      const inventory = await AccommodationInventory.findByPk(accommodationType, {
+        transaction,
+        lock: transaction.LOCK.UPDATE
+      });
 
-    if (!inventory) {
-      throw new Error(`Accommodation inventory is not configured for ${accommodationType}`);
-    }
+      if (!inventory) {
+        throw new Error(`Accommodation inventory is not configured for ${accommodationType}`);
+      }
 
-    const occupiedBeds = await Registration.count({
-      where: {
-        accommodation_type: accommodationType,
-        payment_status: 'paid'
-      },
-      transaction
-    });
+      const occupiedBeds = await Registration.count({
+        where: {
+          accommodation_type: accommodationType,
+          payment_status: 'paid'
+        },
+        transaction
+      });
 
-    if (occupiedBeds >= inventory.beds) {
-      throw new AccommodationUnavailableError('This accommodation option is fully booked');
+      if (occupiedBeds >= inventory.beds) {
+        throw new AccommodationUnavailableError('This accommodation option is fully booked');
+      }
     }
 
     await registration.update({

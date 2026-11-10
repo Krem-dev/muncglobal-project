@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ACCOMMODATION_OPTIONS, API_BASE_URL, getAccommodationFee } from '../config/constants.js';
+import {
+  ACCOMMODATION_OPTIONS,
+  API_BASE_URL,
+  DEFAULT_ACCOMMODATION_TYPE,
+  getAccommodationFee
+} from '../config/constants.js';
 
 const AdminPage = () => {
   const [apiKey, setApiKey] = useState('');
@@ -155,13 +160,13 @@ const AdminPage = () => {
     const momoVerify = data.filter(r => r.payment_status === 'pending_verification').length;
     const totalExpected = data.reduce((sum, registration) => (
       sum + (Number(registration.registration_amount)
-        || getAccommodationFee(registration.accommodation_type || 'fan'))
+        || getAccommodationFee(registration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE))
     ), 0);
     const totalCollected = data
       .filter(r => r.payment_status === 'paid')
       .reduce((sum, r) => sum + (Number(r.Payments?.[0]?.amount)
         || Number(r.registration_amount)
-        || getAccommodationFee(r.accommodation_type || 'fan')), 0);
+        || getAccommodationFee(r.accommodation_type || DEFAULT_ACCOMMODATION_TYPE)), 0);
     return { total, paid, pending, momoVerify, totalExpected, totalCollected, outstanding: totalExpected - totalCollected };
   }, [yearFiltered, registrationFee]);
 
@@ -345,7 +350,7 @@ const AdminPage = () => {
 
         <section className="bg-white rounded-xl border border-slate-200 p-5">
           <h2 className="text-sm font-semibold text-slate-900 mb-4">Accommodation Availability</h2>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {Object.entries(ACCOMMODATION_OPTIONS).map(([type, option]) => {
               const availability = accommodationAvailability?.[type];
               return (
@@ -355,18 +360,28 @@ const AdminPage = () => {
                       <p className="font-medium text-slate-900">{option.label}</p>
                       <p className="text-xs text-slate-500">GH₵{formatCurrency(option.price)} per delegate</p>
                     </div>
-                    <span className="text-xs text-slate-500">
-                      {availability?.occupiedBeds ?? 0}/{option.beds} beds assigned
-                    </span>
+                    {option.capacityTracked ? (
+                      <span className="text-xs text-slate-500">
+                        {availability?.occupiedBeds ?? 0}/{option.beds} beds assigned
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-500">Capacity not tracked</span>
+                    )}
                   </div>
-                  <div className="mt-3 flex gap-6 text-sm">
-                    <p className="text-slate-600">
-                      <span className="font-semibold text-slate-900">{availability?.remainingRooms ?? option.rooms}</span> rooms available
+                  {option.capacityTracked ? (
+                    <div className="mt-3 flex gap-6 text-sm">
+                      <p className="text-slate-600">
+                        <span className="font-semibold text-slate-900">{availability?.remainingRooms ?? option.rooms}</span> rooms available
+                      </p>
+                      <p className="text-slate-600">
+                        <span className="font-semibold text-slate-900">{availability?.remainingBeds ?? option.beds}</span> beds available
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-slate-600">
+                      {availability?.occupiedBeds ?? 0} paid registrations
                     </p>
-                    <p className="text-slate-600">
-                      <span className="font-semibold text-slate-900">{availability?.remainingBeds ?? option.beds}</span> beds available
-                    </p>
-                  </div>
+                  )}
                 </div>
               );
             })}

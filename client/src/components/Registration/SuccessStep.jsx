@@ -3,7 +3,12 @@ import { useToast } from '../../context/ToastContext';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { ACCOMMODATION_OPTIONS, API_BASE_URL, getAccommodationFee } from '../../config/constants';
+import {
+  ACCOMMODATION_OPTIONS,
+  API_BASE_URL,
+  DEFAULT_ACCOMMODATION_TYPE,
+  getAccommodationFee
+} from '../../config/constants';
 
 // Format amount for display
 const formatAmount = (amount, currency = 'GHS') => {
@@ -24,7 +29,9 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
   const toast = useToast();
   const registrationAmount = Number(registrationDetails?.registration_amount || formData?.registrationAmount)
     || getAccommodationFee(registrationDetails?.accommodation_type || formData?.accommodationType);
-  const accommodationType = registrationDetails?.accommodation_type || formData?.accommodationType || 'fan';
+  const accommodationType = registrationDetails?.accommodation_type
+    || formData?.accommodationType
+    || DEFAULT_ACCOMMODATION_TYPE;
   
   useEffect(() => {
     if (formData?.firstName) {
@@ -183,7 +190,10 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
           </div>
           <div>
             <p className="text-gray-600 text-sm">Accommodation</p>
-            <p className="font-medium">{ACCOMMODATION_OPTIONS[accommodationType]?.label || ACCOMMODATION_OPTIONS.fan.label}</p>
+            <p className="font-medium">
+              {ACCOMMODATION_OPTIONS[accommodationType]?.label
+                || ACCOMMODATION_OPTIONS[DEFAULT_ACCOMMODATION_TYPE].label}
+            </p>
           </div>
           <div>
             <p className="text-gray-600 text-sm">Registration Code</p>

@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { motion } from 'framer-motion';
 import MomoPayment from './MomoPayment';
-import { ACCOMMODATION_OPTIONS, getAccommodationFee } from '../../config/constants';
+import {
+  ACCOMMODATION_OPTIONS,
+  DEFAULT_ACCOMMODATION_TYPE,
+  getAccommodationFee
+} from '../../config/constants';
 
 const formatAmount = (amount, currency = 'GHS') => {
   const formatter = new Intl.NumberFormat('en-GH', {
@@ -17,7 +21,7 @@ const PaymentStep = ({ formData, onPaymentComplete }) => {
   const [error, setError] = useState('');
   const toast = useToast();
   const totalFee = formData?.registrationAmount || getAccommodationFee(formData?.accommodationType);
-  const accommodation = ACCOMMODATION_OPTIONS[formData?.accommodationType || 'fan'];
+  const accommodation = ACCOMMODATION_OPTIONS[formData?.accommodationType || DEFAULT_ACCOMMODATION_TYPE];
 
   const handlePaymentError = (error) => {
     console.error('Payment error:', error);

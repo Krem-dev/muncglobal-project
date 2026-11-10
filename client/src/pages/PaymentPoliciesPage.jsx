@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ACCOMMODATION_OPTIONS } from '../config/constants';
+import {
+  ACCOMMODATION_OPTIONS,
+  DEFAULT_ACCOMMODATION_TYPE
+} from '../config/constants';
 
 const PaymentPoliciesPage = () => {
   // Animation variants
@@ -69,7 +72,7 @@ const PaymentPoliciesPage = () => {
               <p className="text-gray-700 text-sm">
                 The registration fee covers conference materials, delegate package, certificate of participation, refreshments
                 during the conference, and access to all conference sessions and events. Prices also include shared
-                accommodation, selected during registration; fan accommodation is selected by default.
+                accommodation, selected during registration;                 standard 4-person fan accommodation is selected by default.
               </p>
             </div>
           </motion.div>

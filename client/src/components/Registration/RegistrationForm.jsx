@@ -7,7 +7,10 @@ import { useToast } from '../../context/ToastContext';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { ACCOMMODATION_OPTIONS } from '../../config/constants';
+import {
+  ACCOMMODATION_OPTIONS,
+  DEFAULT_ACCOMMODATION_TYPE
+} from '../../config/constants';
 
 // Helper function to generate unique registration code
 const generateUniqueCode = () => {
@@ -76,7 +79,7 @@ const RegistrationForm = ({ onSubmit }) => {
       specialNeedsDetails: '',
       emergencyRelationship: '',
       emergencyRelationshipOther: '',
-      accommodationType: 'fan'
+      accommodationType: DEFAULT_ACCOMMODATION_TYPE
     }
   });
   
@@ -85,6 +88,8 @@ const RegistrationForm = ({ onSubmit }) => {
   const watchHowHeard = watch('howHeard');
   const watchEmergencyRelationship = watch('emergencyRelationship');
   const watchAccommodationType = watch('accommodationType');
+  const selectedAccommodation = ACCOMMODATION_OPTIONS[watchAccommodationType]
+    || ACCOMMODATION_OPTIONS[DEFAULT_ACCOMMODATION_TYPE];
   
   const handleFormSubmit = async (data) => {
     try {
@@ -398,35 +403,34 @@ const RegistrationForm = ({ onSubmit }) => {
         <section className="mb-6 rounded-lg border border-gray-200 bg-white p-5">
           <h3 className="text-lg font-semibold text-gray-900 mb-1">Choose your accommodation</h3>
           <p className="text-sm text-gray-600 mb-4">
-            Both packages include conference registration. Choose one option.
+            All packages include conference registration. Standard 4-person fan accommodation is selected by default.
           </p>
-          <div className="grid gap-3 md:grid-cols-2">
+          <label htmlFor="accommodationType" className="mb-2 block text-sm font-medium text-gray-700">
+            Package
+          </label>
+          <select
+            id="accommodationType"
+            {...register('accommodationType')}
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-3 text-gray-900 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
+          >
             {Object.entries(ACCOMMODATION_OPTIONS).map(([type, option]) => (
-              <label
-                key={type}
-                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
-                  watchAccommodationType === type
-                    ? 'border-teal-600 bg-teal-50 ring-1 ring-teal-600'
-                    : 'border-gray-200 bg-white hover:border-teal-300'
-                }`}
-              >
-                <input
-                  type="radio"
-                  value={type}
-                  {...register('accommodationType')}
-                  className="mt-1 h-4 w-4 accent-teal-600"
-                />
-                <span className="flex flex-1 items-start justify-between gap-3">
-                  <span>
-                    <span className="block font-semibold text-gray-900">{option.label}</span>
-                    <span className="mt-1 block text-sm text-gray-600">Shared accommodation</span>
-                  </span>
-                  <span className="whitespace-nowrap text-right font-semibold text-teal-700">
-                    GH₵ {option.price.toLocaleString('en-GH')}
-                  </span>
-                </span>
-              </label>
+              <option key={type} value={type}>
+                {option.label} — GH₵ {option.price.toLocaleString('en-GH')}
+              </option>
             ))}
+          </select>
+          <div className="mt-3 flex items-center justify-between gap-4 rounded-md bg-slate-50 px-4 py-3">
+            <div>
+              <p className="font-medium text-gray-900">{selectedAccommodation.label}</p>
+              <p className="mt-1 text-sm text-gray-600">
+                {watchAccommodationType === DEFAULT_ACCOMMODATION_TYPE
+                  ? 'Standard package'
+                  : 'Shared accommodation'}
+              </p>
+            </div>
+            <p className="whitespace-nowrap text-lg font-semibold text-teal-700">
+              GH₵ {selectedAccommodation.price.toLocaleString('en-GH')}
+            </p>
           </div>
         </section>
 

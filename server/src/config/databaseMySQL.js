@@ -1,7 +1,10 @@
 import { DataTypes } from 'sequelize';
 import { Registration, Payment, PaymentInitialization, AccommodationInventory } from '../models/index.js';
 import sequelize from './sequelizeConfig.js';
-import { ACCOMMODATION_OPTIONS } from '../utils/accommodation.js';
+import {
+  ACCOMMODATION_OPTIONS,
+  DEFAULT_ACCOMMODATION_TYPE
+} from '../utils/accommodation.js';
 
 // Initialize database connection
 export const initializeDatabase = async () => {
@@ -26,7 +29,24 @@ export const initializeDatabase = async () => {
       });
     }
 
+    await sequelize.query(`
+      UPDATE registrations
+      SET accommodation_type = :accommodationType,
+          registration_amount = CASE
+            WHEN payment_status = 'paid' THEN registration_amount
+            ELSE :registrationAmount
+          END
+      WHERE accommodation_type IS NULL OR TRIM(accommodation_type) = ''
+    `, {
+      replacements: {
+        accommodationType: DEFAULT_ACCOMMODATION_TYPE,
+        registrationAmount: ACCOMMODATION_OPTIONS[DEFAULT_ACCOMMODATION_TYPE].price
+      }
+    });
+
     for (const [accommodationType, option] of Object.entries(ACCOMMODATION_OPTIONS)) {
+      if (!option.capacityTracked) continue;
+
       await AccommodationInventory.findOrCreate({
         where: { accommodation_type: accommodationType },
         defaults: {

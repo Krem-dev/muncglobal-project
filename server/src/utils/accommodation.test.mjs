@@ -2,26 +2,36 @@ import assert from 'assert';
 import {
   ACCOMMODATION_OPTIONS,
   calculateAccommodationAvailability,
+  DEFAULT_ACCOMMODATION_TYPE,
   getAccommodationFee,
+  isAccommodationCapacityTracked,
   normalizeAccommodationType
 } from './accommodation.js';
 
-assert.strictEqual(getAccommodationFee(), 1350);
+assert.strictEqual(DEFAULT_ACCOMMODATION_TYPE, 'four_fan');
+assert.strictEqual(getAccommodationFee(), 970);
+assert.strictEqual(getAccommodationFee('four_fan'), 970);
 assert.strictEqual(getAccommodationFee('fan'), 1350);
 assert.strictEqual(getAccommodationFee('aircon'), 1500);
 assert.strictEqual(getAccommodationFee('unknown'), null);
+assert.strictEqual(isAccommodationCapacityTracked('four_fan'), false);
+assert.strictEqual(isAccommodationCapacityTracked('fan'), true);
 assert.strictEqual(normalizeAccommodationType('AIRCON'), 'aircon');
 assert.strictEqual(normalizeAccommodationType('unknown'), null);
 
 assert.deepStrictEqual(
   Object.fromEntries(Object.entries(ACCOMMODATION_OPTIONS).map(([type, option]) => [type, [option.rooms, option.beds]])),
   {
+    four_fan: [undefined, undefined],
     fan: [680, 1360],
     aircon: [132, 264]
   }
 );
 
 const initialAvailability = calculateAccommodationAvailability();
+assert.strictEqual(initialAvailability.four_fan.capacityTracked, false);
+assert.strictEqual(initialAvailability.four_fan.remainingRooms, null);
+assert.strictEqual(initialAvailability.four_fan.remainingBeds, null);
 assert.strictEqual(initialAvailability.fan.remainingRooms, 680);
 assert.strictEqual(initialAvailability.fan.remainingBeds, 1360);
 assert.strictEqual(initialAvailability.aircon.remainingRooms, 132);
@@ -39,5 +49,9 @@ assert.strictEqual(airconFull.aircon.remainingBeds, 0);
 const airconOverCapacity = calculateAccommodationAvailability({ aircon: 265 });
 assert.strictEqual(airconOverCapacity.aircon.remainingRooms, 0);
 assert.strictEqual(airconOverCapacity.aircon.remainingBeds, 0);
+
+const fourFanRegistrations = calculateAccommodationAvailability({ four_fan: 200 });
+assert.strictEqual(fourFanRegistrations.four_fan.occupiedBeds, 200);
+assert.strictEqual(fourFanRegistrations.four_fan.remainingBeds, null);
 
 console.log('accommodation tests passed');

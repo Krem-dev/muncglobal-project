@@ -6,22 +6,31 @@
 export const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://muncglobal-project-server.onrender.com/api').trim();
 
 export const ACCOMMODATION_OPTIONS = {
+  four_fan: {
+    label: '4 in 1 with fan',
+    price: 970,
+    capacityTracked: false
+  },
   fan: {
     label: '2 in 1 with fan',
     price: 1350,
+    capacityTracked: true,
     rooms: 680,
     beds: 1360
   },
   aircon: {
     label: '2 in 1 with air conditioning',
     price: 1500,
+    capacityTracked: true,
     rooms: 132,
     beds: 264
   }
 };
 
-export const getAccommodationFee = (accommodationType = 'fan') => {
-  return ACCOMMODATION_OPTIONS[accommodationType]?.price ?? ACCOMMODATION_OPTIONS.fan.price;
+export const DEFAULT_ACCOMMODATION_TYPE = 'four_fan';
+
+export const getAccommodationFee = (accommodationType = DEFAULT_ACCOMMODATION_TYPE) => {
+  return ACCOMMODATION_OPTIONS[accommodationType]?.price ?? ACCOMMODATION_OPTIONS[DEFAULT_ACCOMMODATION_TYPE].price;
 };
 
 export const REGISTRATION_FEE = getAccommodationFee();

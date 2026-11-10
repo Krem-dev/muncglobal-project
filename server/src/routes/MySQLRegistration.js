@@ -7,6 +7,7 @@ import sequelize from '../config/sequelizeConfig.js';
 import {
   DEFAULT_ACCOMMODATION_TYPE,
   getAccommodationFee,
+  isAccommodationCapacityTracked,
   normalizeAccommodationType
 } from '../utils/accommodation.js';
 import {
@@ -72,7 +73,10 @@ router.post('/', async (req, res) => {
     }
 
     const availability = await getAccommodationAvailability();
-    if (availability[accommodationType].remainingBeds <= 0) {
+    if (
+      isAccommodationCapacityTracked(accommodationType)
+      && availability[accommodationType].remainingBeds <= 0
+    ) {
       return res.status(409).json({
         status: 'error',
         message: 'This accommodation option is fully booked'
@@ -438,20 +442,22 @@ router.post('/complete', async (req, res) => {
     }
 
     const registration = await sequelize.transaction(async (transaction) => {
-      const inventory = await AccommodationInventory.findByPk(accommodationType, {
-        transaction,
-        lock: transaction.LOCK.UPDATE
-      });
-      if (!inventory) {
-        throw new Error(`Accommodation inventory is not configured for ${accommodationType}`);
-      }
+      if (isAccommodationCapacityTracked(accommodationType)) {
+        const inventory = await AccommodationInventory.findByPk(accommodationType, {
+          transaction,
+          lock: transaction.LOCK.UPDATE
+        });
+        if (!inventory) {
+          throw new Error(`Accommodation inventory is not configured for ${accommodationType}`);
+        }
 
-      const occupiedBeds = await Registration.count({
-        where: { accommodation_type: accommodationType, payment_status: 'paid' },
-        transaction
-      });
-      if (occupiedBeds >= inventory.beds) {
-        throw new AccommodationUnavailableError('This accommodation option is fully booked');
+        const occupiedBeds = await Registration.count({
+          where: { accommodation_type: accommodationType, payment_status: 'paid' },
+          transaction
+        });
+        if (occupiedBeds >= inventory.beds) {
+          throw new AccommodationUnavailableError('This accommodation option is fully booked');
+        }
       }
 
       return Registration.create({
@@ -775,7 +781,13 @@ router.post('/momo-payment', async (req, res) => {
 
     const accommodationType = normalizeAccommodationType(registration.accommodation_type);
     const availability = await getAccommodationAvailability();
-    if (!accommodationType || availability[accommodationType].remainingBeds <= 0) {
+    if (
+      !accommodationType
+      || (
+        isAccommodationCapacityTracked(accommodationType)
+        && availability[accommodationType].remainingBeds <= 0
+      )
+    ) {
       return res.status(409).json({
         status: 'error',
         message: 'This accommodation option is fully booked'
