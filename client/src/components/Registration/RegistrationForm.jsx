@@ -132,8 +132,20 @@ const RegistrationForm = ({ onSubmit }) => {
         throw new Error(registrationResponse.data.message || 'Registration failed');
       }
 
-      registrationData.registrationAmount = registrationResponse.data.data.registrationAmount;
-      registrationData.accommodationType = registrationResponse.data.data.accommodationType;
+      const savedRegistration = registrationResponse.data.data;
+      const expectedAccommodation = ACCOMMODATION_OPTIONS[data.accommodationType];
+      const savedRegistrationAmount = Number(savedRegistration?.registrationAmount);
+      if (
+        savedRegistration?.accommodationType !== data.accommodationType
+        || savedRegistrationAmount !== expectedAccommodation.price
+      ) {
+        throw new Error(
+          `Registration ${registrationCode} was created, but the server did not confirm your selected accommodation and price. Do not pay; contact support with your registration code.`
+        );
+      }
+
+      registrationData.registrationAmount = savedRegistrationAmount;
+      registrationData.accommodationType = savedRegistration.accommodationType;
       sessionStorage.setItem('pendingRegistration', JSON.stringify(registrationData));
       
       onSubmit(registrationData);
