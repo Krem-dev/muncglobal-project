@@ -7,11 +7,13 @@ export const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://muncglobal
 
 export const ACCOMMODATION_OPTIONS = {
   four_fan: {
+    tier: 'Standard',
     label: '4 in 1 with fan',
     price: 970,
     capacityTracked: false
   },
   fan: {
+    tier: 'Premium',
     label: '2 in 1 with fan',
     price: 1350,
     capacityTracked: true,
@@ -19,6 +21,7 @@ export const ACCOMMODATION_OPTIONS = {
     beds: 1360
   },
   aircon: {
+    tier: 'Deluxe',
     label: '2 in 1 with air conditioning',
     price: 1500,
     capacityTracked: true,

@@ -20,8 +20,10 @@ const formatAmount = (amount, currency = 'GHS') => {
 const PaymentStep = ({ formData, onPaymentComplete }) => {
   const [error, setError] = useState('');
   const toast = useToast();
-  const totalFee = formData?.registrationAmount || getAccommodationFee(formData?.accommodationType);
-  const accommodation = ACCOMMODATION_OPTIONS[formData?.accommodationType || DEFAULT_ACCOMMODATION_TYPE];
+  const accommodationType = formData?.accommodationType || DEFAULT_ACCOMMODATION_TYPE;
+  const totalFee = getAccommodationFee(accommodationType);
+  const accommodation = ACCOMMODATION_OPTIONS[accommodationType]
+    || ACCOMMODATION_OPTIONS[DEFAULT_ACCOMMODATION_TYPE];
 
   const handlePaymentError = (error) => {
     console.error('Payment error:', error);
@@ -91,7 +93,7 @@ const PaymentStep = ({ formData, onPaymentComplete }) => {
 
         <div className="border-t border-gray-200 pt-4 mb-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-700">Registration + {accommodation.label}</span>
+            <span className="text-gray-700">Registration + {accommodation.tier} ({accommodation.label})</span>
             <span className="font-semibold">{formatAmount(totalFee)}</span>
           </div>
           <div className="flex justify-between items-center mb-2 text-sm text-gray-500">

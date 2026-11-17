@@ -27,8 +27,9 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
   const registrationCodeRef = useRef(null);
   const [copiedCode, setCopiedCode] = useState(false);
   const toast = useToast();
-  const registrationAmount = Number(registrationDetails?.registration_amount || formData?.registrationAmount)
-    || getAccommodationFee(registrationDetails?.accommodation_type || formData?.accommodationType);
+  const registrationAmount = getAccommodationFee(
+    registrationDetails?.accommodation_type || formData?.accommodationType
+  );
   const accommodationType = registrationDetails?.accommodation_type
     || formData?.accommodationType
     || DEFAULT_ACCOMMODATION_TYPE;
@@ -191,6 +192,7 @@ const SuccessStep = ({ formData, paymentData, delegateId }) => {
           <div>
             <p className="text-gray-600 text-sm">Accommodation</p>
             <p className="font-medium">
+              {ACCOMMODATION_OPTIONS[accommodationType]?.tier || 'Standard'} —{' '}
               {ACCOMMODATION_OPTIONS[accommodationType]?.label
                 || ACCOMMODATION_OPTIONS[DEFAULT_ACCOMMODATION_TYPE].label}
             </p>

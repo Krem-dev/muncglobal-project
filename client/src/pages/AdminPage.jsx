@@ -17,7 +17,6 @@ const AdminPage = () => {
   const [deletingId, setDeletingId] = useState(null);
   const [selectedYear, setSelectedYear] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [registrationFee, setRegistrationFee] = useState(getAccommodationFee());
   const [accommodationAvailability, setAccommodationAvailability] = useState(null);
 
   const fetchRegistrations = async (key) => {
@@ -31,9 +30,6 @@ const AdminPage = () => {
       const data = await response.json();
       setRegistrations(data.data || []);
       setAccommodationAvailability(data.accommodationAvailability || null);
-      if (data.financials?.registrationFee) {
-        setRegistrationFee(data.financials.registrationFee);
-      }
     } catch (err) {
       setError('Failed to fetch registrations. Please check your API key.');
       throw err;
@@ -159,16 +155,20 @@ const AdminPage = () => {
     const pending = data.filter(r => r.payment_status === 'pending').length;
     const momoVerify = data.filter(r => r.payment_status === 'pending_verification').length;
     const totalExpected = data.reduce((sum, registration) => (
-      sum + (Number(registration.registration_amount)
-        || getAccommodationFee(registration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE))
+      sum + getAccommodationFee(registration.admin_accommodation_type
+          || registration.accommodation_type
+          || DEFAULT_ACCOMMODATION_TYPE)
     ), 0);
     const totalCollected = data
       .filter(r => r.payment_status === 'paid')
-      .reduce((sum, r) => sum + (Number(r.Payments?.[0]?.amount)
-        || Number(r.registration_amount)
-        || getAccommodationFee(r.accommodation_type || DEFAULT_ACCOMMODATION_TYPE)), 0);
+      .reduce((sum, registration) => (
+        sum + Number(registration.admin_display_amount
+          ?? getAccommodationFee(registration.admin_accommodation_type
+            || registration.accommodation_type
+            || DEFAULT_ACCOMMODATION_TYPE))
+      ), 0);
     return { total, paid, pending, momoVerify, totalExpected, totalCollected, outstanding: totalExpected - totalCollected };
-  }, [yearFiltered, registrationFee]);
+  }, [yearFiltered]);
 
   const filteredRegistrations = useMemo(() => {
     let data = yearFiltered;
@@ -357,6 +357,7 @@ const AdminPage = () => {
                 <div key={type} className="rounded-lg border border-slate-200 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">{option.tier}</p>
                       <p className="font-medium text-slate-900">{option.label}</p>
                       <p className="text-xs text-slate-500">GH₵{formatCurrency(option.price)} per delegate</p>
                     </div>
@@ -385,6 +386,14 @@ const AdminPage = () => {
                 </div>
               );
             })}
+          </div>
+          <div className="mt-4 rounded-lg bg-slate-50 px-4 py-3" aria-label="Accommodation package key">
+            <p className="text-xs font-semibold text-slate-700">Package key</p>
+            <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+              {Object.values(ACCOMMODATION_OPTIONS).map(option => (
+                <span key={option.tier}>{option.tier}: {option.label} (GH₵{formatCurrency(option.price)})</span>
+              ))}
+            </p>
           </div>
           <p className="mt-3 text-xs text-slate-400">Availability counts confirmed registrations only.</p>
         </section>
@@ -495,11 +504,16 @@ const AdminPage = () => {
                           </span>
                         </td>
                         <td className="px-2 py-2.5 text-slate-600 text-xs">
-                          {ACCOMMODATION_OPTIONS[reg.accommodation_type]?.label || 'Legacy / unspecified'}
+                          <span className="font-semibold text-slate-700">
+                            {ACCOMMODATION_OPTIONS[reg.admin_accommodation_type || reg.accommodation_type || DEFAULT_ACCOMMODATION_TYPE]?.tier || 'Standard'}
+                          </span>
+                          <br />
+                          {ACCOMMODATION_OPTIONS[reg.admin_accommodation_type || reg.accommodation_type || DEFAULT_ACCOMMODATION_TYPE]?.label
+                            || ACCOMMODATION_OPTIONS[DEFAULT_ACCOMMODATION_TYPE].label}
                         </td>
                         <td className="px-2 py-2.5 text-slate-600 text-xs font-mono">
-                          {(reg.Payments?.[0]?.amount || reg.registration_amount || reg.payment_status === 'paid')
-                            ? `₵${formatCurrency(reg.Payments?.[0]?.amount || reg.registration_amount || registrationFee)}`
+                          {reg.admin_display_amount
+                            ? `₵${formatCurrency(reg.admin_display_amount)}`
                             : '—'
                           }
                         </td>

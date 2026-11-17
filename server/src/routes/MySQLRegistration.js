@@ -7,6 +7,7 @@ import sequelize from '../config/sequelizeConfig.js';
 import {
   DEFAULT_ACCOMMODATION_TYPE,
   getAccommodationFee,
+  getAccommodationTypeForAmount,
   isAccommodationCapacityTracked,
   normalizeAccommodationType
 } from '../utils/accommodation.js';
@@ -253,22 +254,50 @@ router.get('/', async (req, res) => {
       ],
       include: [{
         model: Payment,
-        attributes: ['transaction_id', 'amount', 'payment_date', 'payment_method']
+        attributes: ['transaction_id', 'amount', 'payment_date', 'payment_method', 'status']
       }],
       order: [['created_at', 'DESC']]
     });
     
     // Convert to plain objects
-    const registrationsData = registrations.map(reg => reg.get({ plain: true }));
+    const registrationsData = registrations.map(registration => {
+      const registrationData = registration.get({ plain: true });
+      const successfulPaymentAmounts = [...new Set(
+        (registrationData.Payments || [])
+          .filter(payment => payment.status === 'success')
+          .map(payment => Number(payment.amount))
+          .filter(Number.isFinite)
+      )];
+      const inferredType = successfulPaymentAmounts.length === 1
+        ? getAccommodationTypeForAmount(successfulPaymentAmounts[0])
+        : null;
+      const savedAccommodationType = normalizeAccommodationType(registrationData.accommodation_type);
+      const adminAccommodationType = (
+        savedAccommodationType && savedAccommodationType !== DEFAULT_ACCOMMODATION_TYPE
+          ? savedAccommodationType
+          : inferredType || savedAccommodationType
+      )
+        || DEFAULT_ACCOMMODATION_TYPE;
+      const paidAmount = successfulPaymentAmounts.length === 1
+        ? successfulPaymentAmounts[0]
+        : null;
+
+      return {
+        ...registrationData,
+        admin_accommodation_type: adminAccommodationType,
+        admin_paid_amount: paidAmount,
+        admin_display_amount: paidAmount ?? getAccommodationFee(adminAccommodationType)
+      };
+    });
     
     // Keep finance totals and room availability independent of education level.
     const registrationFee = getAccommodationFee(DEFAULT_ACCOMMODATION_TYPE);
     const totalExpected = registrationsData.reduce((sum, reg) => (
-      sum + (Number(reg.registration_amount) || getAccommodationFee(reg.accommodation_type || DEFAULT_ACCOMMODATION_TYPE))
+      sum + getAccommodationFee(reg.admin_accommodation_type)
     ), 0);
     const totalPaid = registrationsData
       .filter(reg => reg.payment_status === 'paid')
-      .reduce((sum, reg) => sum + (Number(reg.Payment?.amount) || Number(reg.registration_amount) || registrationFee), 0);
+      .reduce((sum, reg) => sum + reg.admin_display_amount, 0);
     const totalPending = totalExpected - totalPaid;
     const accommodationAvailability = await getAccommodationAvailability();
     

@@ -4,6 +4,7 @@ import {
   calculateAccommodationAvailability,
   DEFAULT_ACCOMMODATION_TYPE,
   getAccommodationFee,
+  getAccommodationTypeForAmount,
   isAccommodationCapacityTracked,
   normalizeAccommodationType
 } from './accommodation.js';
@@ -14,6 +15,10 @@ assert.strictEqual(getAccommodationFee('four_fan'), 970);
 assert.strictEqual(getAccommodationFee('fan'), 1350);
 assert.strictEqual(getAccommodationFee('aircon'), 1500);
 assert.strictEqual(getAccommodationFee('unknown'), null);
+assert.strictEqual(getAccommodationTypeForAmount(970), 'four_fan');
+assert.strictEqual(getAccommodationTypeForAmount('1350.00'), 'fan');
+assert.strictEqual(getAccommodationTypeForAmount(1500), 'aircon');
+assert.strictEqual(getAccommodationTypeForAmount(1000), null);
 assert.strictEqual(isAccommodationCapacityTracked('four_fan'), false);
 assert.strictEqual(isAccommodationCapacityTracked('fan'), true);
 assert.strictEqual(normalizeAccommodationType('AIRCON'), 'aircon');

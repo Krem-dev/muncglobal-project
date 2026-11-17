@@ -1,10 +1,12 @@
 export const ACCOMMODATION_OPTIONS = {
   four_fan: {
+    tier: 'Standard',
     label: '4 in 1 with fan',
     price: 970,
     capacityTracked: false
   },
   fan: {
+    tier: 'Premium',
     label: '2 in 1 with fan',
     price: 1350,
     capacityTracked: true,
@@ -12,6 +14,7 @@ export const ACCOMMODATION_OPTIONS = {
     beds: 1360
   },
   aircon: {
+    tier: 'Deluxe',
     label: '2 in 1 with air conditioning',
     price: 1500,
     capacityTracked: true,
@@ -30,6 +33,15 @@ export const normalizeAccommodationType = (type) => {
 export const getAccommodationFee = (type = DEFAULT_ACCOMMODATION_TYPE) => {
   const normalizedType = normalizeAccommodationType(type);
   return normalizedType ? ACCOMMODATION_OPTIONS[normalizedType].price : null;
+};
+
+export const getAccommodationTypeForAmount = (amount) => {
+  const numericAmount = Number(amount);
+  const matchingTypes = Object.entries(ACCOMMODATION_OPTIONS)
+    .filter(([, option]) => option.price === numericAmount)
+    .map(([type]) => type);
+
+  return matchingTypes.length === 1 ? matchingTypes[0] : null;
 };
 
 export const isAccommodationCapacityTracked = (type) => {

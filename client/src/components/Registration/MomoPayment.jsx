@@ -23,7 +23,7 @@ const MomoPayment = ({ registrationData, onPaymentSubmitted, onPaymentError }) =
 
   const MOMO_ACCOUNT_NUMBER = import.meta.env.VITE_MOMO_ACCOUNT_NUMBER || '054 198 0652';
   const MOMO_ACCOUNT_NAME = import.meta.env.VITE_MOMO_ACCOUNT_NAME || 'MUNC-GLOBAL LBG';
-  const selectedFee = registrationData?.registrationAmount || getAccommodationFee(registrationData?.accommodationType);
+  const selectedFee = getAccommodationFee(registrationData?.accommodationType);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

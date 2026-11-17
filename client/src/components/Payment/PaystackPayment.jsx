@@ -12,7 +12,7 @@ const PaystackPayment = ({ registrationData, onPaymentSuccess, onPaymentError })
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const toast = useToast();
-  const selectedFee = registrationData?.registrationAmount || getAccommodationFee(registrationData?.accommodationType);
+  const selectedFee = getAccommodationFee(registrationData?.accommodationType);
 
   // Validate registrationData
   console.log('PaystackPayment - registrationData:', registrationData);

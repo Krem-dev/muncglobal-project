@@ -50,8 +50,19 @@ router.post('/initialize', async (req, res) => {
       return res.status(404).json({ status: 'error', message: 'Registration not found' });
     }
 
-    const amount = Number(registration.registration_amount)
-      || getAccommodationFee(registration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE);
+    const amount = getAccommodationFee(
+      registration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE
+    );
+    if (amount === null) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Registration has an invalid accommodation package'
+      });
+    }
+
+    if (registration.payment_status !== 'paid' && Number(registration.registration_amount) !== amount) {
+      await registration.update({ registration_amount: amount });
+    }
     
     // Convert amount to kobo/pesewas (smallest currency unit)
     const amountInPesewas = Math.round(amount * 100);
@@ -214,9 +225,10 @@ router.get('/verify/:reference', async (req, res) => {
     if (existingRegistration) {
       console.log('Found existing registration:', existingRegistration.id, existingRegistration.registration_code);
 
-      const expectedAmount = Number(existingRegistration.registration_amount)
-        || getAccommodationFee(existingRegistration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE);
-      if (Number(transactionData.amount) !== Math.round(expectedAmount * 100)) {
+      const expectedAmount = getAccommodationFee(
+        existingRegistration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE
+      );
+      if (expectedAmount === null || Number(transactionData.amount) !== Math.round(expectedAmount * 100)) {
         return res.status(400).json({
           status: 'error',
           message: 'Payment amount does not match the registration accommodation price'
@@ -311,9 +323,10 @@ router.post('/webhook', async (req, res) => {
           });
           
           if (!existingPayment) {
-            const expectedAmount = Number(registration.registration_amount)
-              || getAccommodationFee(registration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE);
-            if (Number(data.amount) !== Math.round(expectedAmount * 100)) {
+            const expectedAmount = getAccommodationFee(
+              registration.accommodation_type || DEFAULT_ACCOMMODATION_TYPE
+            );
+            if (expectedAmount === null || Number(data.amount) !== Math.round(expectedAmount * 100)) {
               throw new Error('Paystack webhook amount does not match the registration accommodation price');
             }
 
