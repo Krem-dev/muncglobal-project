@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import CountdownTimer from './CountdownTimer';
 import CompactCountdown from './CompactCountdown';
 
+const CONFERENCE_DATE = new Date('2027-01-01T09:00:00');
 
 const CountdownContainer = ({ 
   variant = 'full', 
   className = '',
   onComplete = null
 }) => {
-  const conferenceDate = new Date('2027-01-02T09:00:00');
-  
   const [timeRemaining, setTimeRemaining] = useState({
     days: 0,
     hours: 0,
@@ -21,7 +20,7 @@ const CountdownContainer = ({
   useEffect(() => {
     const calculateTimeRemaining = () => {
       const now = new Date().getTime();
-      const difference = conferenceDate.getTime() - now;
+      const difference = CONFERENCE_DATE.getTime() - now;
 
       if (difference <= 0) {
         setTimeRemaining({
@@ -57,12 +56,12 @@ const CountdownContainer = ({
     const intervalId = setInterval(calculateTimeRemaining, 1000);
 
     return () => clearInterval(intervalId);
-  }, [conferenceDate, onComplete]);
+  }, [onComplete]);
 
   // Render appropriate countdown variant
   return variant === 'full' ? (
     <CountdownTimer 
-      targetDate={conferenceDate} 
+      targetDate={CONFERENCE_DATE}
       className={className} 
       onComplete={onComplete} 
     />

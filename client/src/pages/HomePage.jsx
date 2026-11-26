@@ -335,7 +335,7 @@ const HomePage = () => {
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span>January 2-5, 2027</span>
+                  <span>January 1–4, 2027</span>
                 </div>
               </div>
               <p className="mb-8">
@@ -360,33 +360,33 @@ const HomePage = () => {
             >
               <img
                 src="/images/event.JPG"
-                alt="MUNC-GLOBAL conference delegates gathered for a session"
+                alt="MUNC-GH conference delegates gathered for a session"
                 className="w-full aspect-[16/9] object-cover rounded-lg shadow-xl"
               />
               <div className="grid grid-cols-2 items-start gap-3 sm:gap-4">
               <a
-                href="/images/IMG-20261014-WA0001.jpg"
+                href="/images/conference-flyer-january-2027-ambassadors.jpg"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Open the MUNC-GLOBAL Conference 2027 flyer with youth ambassadors"
                 className="block overflow-hidden rounded-lg shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-yellow-300"
               >
                 <img
-                  src="/images/IMG-20261014-WA0001.jpg"
-                  alt="MUNC-GLOBAL Conference 2027 flyer featuring four youth ambassadors"
+                  src="/images/conference-flyer-january-2027-ambassadors.jpg"
+                  alt="MUNC-GLOBAL Conference 2027 flyer, January 1–4, featuring youth ambassadors"
                   className="w-full h-auto"
                 />
               </a>
               <a
-                href="/images/IMG-20261014-WA0002.jpg"
+                href="/images/conference-flyer-january-2027-speakers.jpg"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Open the MUNC-GLOBAL Conference 2027 flyer with conference speakers"
                 className="block overflow-hidden rounded-lg shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-yellow-300"
               >
                 <img
-                  src="/images/IMG-20261014-WA0002.jpg"
-                  alt="MUNC-GLOBAL Conference 2027 flyer featuring conference speakers"
+                  src="/images/conference-flyer-january-2027-speakers.jpg"
+                  alt="MUNC-GLOBAL Conference 2027 flyer, January 1–4, featuring conference speakers"
                   className="w-full h-auto"
                 />
               </a>
@@ -407,6 +407,11 @@ const HomePage = () => {
             variants={slideUp}
             transition={{ duration: 0.6 }}
           >
+            <img
+              src="/images/conference-artboard-january-2027.png"
+              alt="MUNC-GLOBAL Conference 2027, January 1–4 at UPSA, Accra"
+              className="w-full max-w-md h-auto mx-auto mb-8 rounded-lg shadow-md"
+            />
             <h2 className="section-title">Join Us in Creating Change</h2>
             <p className="section-subtitle mb-8">
               Be part of a global movement of young leaders committed to making a positive impact in their communities.
